@@ -159,11 +159,11 @@
     { min: 620, name: '史料解読の達人' },
     { min: 760, name: '歴史の案内人' },
     { min: 1050, name: '歴史学者' },
-    { min: 1400, name: '日本史の教授' },
-    { min: 1800, name: '歴史博士' },
-    { min: 2250, name: '日本史の生き字引' },
-    { min: 2700, name: '歴史賢者' },
-    { min: 3100, name: '歴史の伝説' }
+    { min: 1540, name: '日本史の教授' },
+    { min: 1980, name: '歴史博士' },
+    { min: 2480, name: '日本史の生き字引' },
+    { min: 2970, name: '歴史賢者' },
+    { min: 3410, name: '歴史の伝説' }
   ];
 
   function pointsBreakdown() {
