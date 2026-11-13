@@ -472,7 +472,7 @@
   }
 
   /* ---------------- 豆知識 ---------------- */
-  var STATUS_LABEL = { verified: '検証済み', tradition: '伝承', disputed: '諸説あり', legend: '伝承' };
+  var STATUS_LABEL = { verified: '検証済み', tradition: '伝承', disputed: '諸説あり', legend: '伝承', popular_myth: '俗説・誤解' };
   function renderTrivia(focusId) {
     A.setTitle('豆知識');
     var list = focusId ? D.trivia.filter(function (t) { return t.id === focusId; }) : D.trivia;

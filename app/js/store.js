@@ -47,7 +47,7 @@
     var resolved = resolveTheme();
     document.documentElement.setAttribute('data-color-theme', resolved);
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#171410' : '#faf7f2');
+    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#1f2233' : '#f8f0de');
   }
   applyTheme();
   (function watchOsTheme() {
@@ -159,11 +159,11 @@
     { min: 620, name: '史料解読の達人' },
     { min: 760, name: '歴史の案内人' },
     { min: 1050, name: '歴史学者' },
-    { min: 1970, name: '日本史の教授' },
-    { min: 2540, name: '歴史博士' },
-    { min: 3170, name: '日本史の生き字引' },
-    { min: 3810, name: '歴史賢者' },
-    { min: 4370, name: '歴史の伝説' }
+    { min: 2020, name: '日本史の教授' },
+    { min: 2600, name: '歴史博士' },
+    { min: 3250, name: '日本史の生き字引' },
+    { min: 3910, name: '歴史賢者' },
+    { min: 4480, name: '歴史の伝説' }
   ];
 
   function pointsBreakdown() {

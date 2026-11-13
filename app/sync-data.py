@@ -10,7 +10,7 @@
   data/questions_hs.json  高校問題704問（画像参照を正規化）
   data/questions_jhs.json 中学問題200問
   data/texts.json         単元テキスト14本（verification_notes は内部用につき除外）
-  data/glossary.json      辞書（補完v1〜v11 ∪ 問題キーターム ∪ テキストキーターム = ホスト型と同規則）
+  data/glossary.json      辞書（補完v1〜v12 ∪ 問題キーターム ∪ テキストキーターム = ホスト型と同規則）
   data/years.json         年号DB 339件（years_db_v7）
   data/world.json         世界年表 127件
   data/trivia.json        豆知識 60件
@@ -147,8 +147,8 @@ def sync_glossary(hs, jhs, texts):
             }
         return terms[term]
 
-    # 1) 補完 v1〜v11（後発が欠けを埋め、appears_in は統合）
-    for i in range(1, 12):
+    # 1) 補完 v1〜v12（後発が欠けを埋め、appears_in は統合）
+    for i in range(1, 13):
         path = os.path.join(HS_DIR, "glossary", f"glossary_supplement_v{i}.json")
         if not os.path.exists(path):
             continue
@@ -270,7 +270,7 @@ def blankable(term):
 
 def sync_cloze(hs, jhs, texts, glossary):
     verified = set()
-    for i in range(1, 12):
+    for i in range(1, 13):
         path = os.path.join(HS_DIR, "glossary", f"glossary_supplement_v{i}.json")
         if not os.path.exists(path):
             continue

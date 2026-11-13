@@ -28,6 +28,7 @@
   --steel-soft: #e8eff2;
   --brand: #1f2a5a;
   --gold: #c8a24a;
+  --vtext: #9a7b24;
   --gold-soft: #fdf3d8;
   --line: #e4dac8;
   --ok: #1e7d46;
@@ -55,8 +56,10 @@ html[data-color-theme="dark"] {
     --surface: #292c3e;
     --surface-alt: #343849;
     --gold-soft: #3a3115;
+    --vtext: #d9b45c;
     --ink: #f2ecdd;
-    --muted: #aca48e;
+    /* 総点検: 補助文字（注記・ID類）が沈まないよう一段だけ明るく（主文との階調は維持） */
+    --muted: #bcb49d;
     --accent: #e0685a;
     --accent-soft: #40271f;
     --moss: #8fb573;
@@ -86,6 +89,8 @@ a { color: var(--steel); }
 .muted { color: var(--muted); }
 .small { font-size: .82em; }
 .idlabel { font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); opacity: .75; }
+/* 総点検: ダークではIDラベルの減衰を一段弱め、読み取れる濃さにする */
+html[data-color-theme="dark"] .idlabel { opacity: .9; }
 .reading, .body-text, .explain p { line-height: 1.85; }
 
 /* header — 地色バー＋中央に明朝タイトル＋円形ボタン（ホスト型と同一様式） */
@@ -337,6 +342,8 @@ html[data-color-theme="dark"] .badge.created { background: #3d2f16; color: #e0aa
 a.termlink {
   color: var(--accent); font-weight: 600;
   text-decoration: underline dotted; text-underline-offset: 4px; cursor: pointer;
+  /* 用語リンクは語の途中で割らない（行末分割の防止。本文全体の改行挙動は変えない） */
+  word-break: keep-all;
 }
 a.placelink {
   color: var(--steel); font-weight: 600;
@@ -464,11 +471,12 @@ html[data-color-theme="dark"] body {
   background-size: 60px 30px;
 }
 .hero > * { position: relative; }
-/* ヒーロー右肩の縦書きアクセント（和風強化 v3） */
+/* ヒーロー右肩の縦書きアクセント（和風強化 v3／総点検で視認性を一段引き上げ:
+ * 地色に沈まないよう専用の金色 --vtext（ライトは深い金、ダークは明るい金）を使い、不透明度も上げる */
 .hero::after {
   content: "日本史"; position: absolute; top: 14px; right: 12px; pointer-events: none;
   writing-mode: vertical-rl; font-family: var(--mincho); font-weight: 700;
-  font-size: .8em; letter-spacing: .42em; color: var(--gold); opacity: .55;
+  font-size: .8em; letter-spacing: .42em; color: var(--vtext); opacity: .85;
 }
 
 /* ヘッダーの線画アイコン（和風強化 v3 で拡大） */
