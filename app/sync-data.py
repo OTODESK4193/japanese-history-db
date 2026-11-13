@@ -7,11 +7,11 @@
 正本が更新されたら、このスクリプトを再実行すれば静的版データも追随する。
 
 生成物:
-  data/questions_hs.json  高校問題596問（画像参照を正規化）
+  data/questions_hs.json  高校問題641問（画像参照を正規化）
   data/questions_jhs.json 中学問題200問
   data/texts.json         単元テキスト14本（verification_notes は内部用につき除外）
-  data/glossary.json      辞書（補完v1〜v9 ∪ 問題キーターム ∪ テキストキーターム = ホスト型と同規則）
-  data/years.json         年号DB 271件（years_db_v5）
+  data/glossary.json      辞書（補完v1〜v10 ∪ 問題キーターム ∪ テキストキーターム = ホスト型と同規則）
+  data/years.json         年号DB 311件（years_db_v6）
   data/world.json         世界年表 127件
   data/trivia.json        豆知識 60件
   data/commentaries.json  模範解答の解説31件＋分析レコード
@@ -147,8 +147,8 @@ def sync_glossary(hs, jhs, texts):
             }
         return terms[term]
 
-    # 1) 補完 v1〜v9（後発が欠けを埋め、appears_in は統合）
-    for i in range(1, 10):
+    # 1) 補完 v1〜v10（後発が欠けを埋め、appears_in は統合）
+    for i in range(1, 11):
         path = os.path.join(HS_DIR, "glossary", f"glossary_supplement_v{i}.json")
         if not os.path.exists(path):
             continue
@@ -206,7 +206,7 @@ def sync_glossary(hs, jhs, texts):
 
 # ---------------------------------------------------------------- simple copies
 def sync_simple():
-    years = load(os.path.join(HS_DIR, "years", "years_db_v5.json"))
+    years = load(os.path.join(HS_DIR, "years", "years_db_v6.json"))
     dump("years.json", years)
     world = load(os.path.join(HS_DIR, "years", "world_events_db_v1.json"))
     dump("world.json", world["records"])
@@ -270,7 +270,7 @@ def blankable(term):
 
 def sync_cloze(hs, jhs, texts, glossary):
     verified = set()
-    for i in range(1, 10):
+    for i in range(1, 11):
         path = os.path.join(HS_DIR, "glossary", f"glossary_supplement_v{i}.json")
         if not os.path.exists(path):
             continue
