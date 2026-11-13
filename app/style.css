@@ -349,6 +349,46 @@ a.placelink {
   color: var(--steel); font-weight: 600;
   text-decoration: underline dotted; text-underline-offset: 4px; cursor: pointer;
 }
+
+/* 暗記シート: html.mask-on のとき色付き語句を用語と同じ幅の塗りつぶしブロックにする。
+ * ブロック色はライト＝墨色／ダーク＝温かい灰で、地色に沈まず和風の配色に馴染む中間調にする。
+ * タップで .revealed が付くと通常の文字色（本文色）で表示され、もう一度タップで隠れる。 */
+:root { --mask-bg: #3a352b; }
+html[data-color-theme="dark"] { --mask-bg: #8f8875; }
+html.mask-on a.termlink, html.mask-on a.placelink {
+  color: transparent; background-color: var(--mask-bg);
+  text-decoration: none; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
+}
+html.mask-on a.termlink.revealed, html.mask-on a.placelink.revealed {
+  color: var(--ink); background-color: transparent; box-shadow: none;
+}
+/* 対象外の範囲（穴埋め解説 .no-mask／用語シート等のオーバーレイ内）は通常表示を保つ */
+html.mask-on .no-mask a.termlink, html.mask-on .overlay a.termlink {
+  color: var(--accent); background: transparent; box-shadow: none;
+  text-decoration: underline dotted;
+}
+html.mask-on .no-mask a.placelink, html.mask-on .overlay a.placelink {
+  color: var(--steel); background: transparent; box-shadow: none;
+  text-decoration: underline dotted;
+}
+/* 暗記シートON/OFFボタン（テキスト画面・問題画面・振り返り画面に共通） */
+.mask-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--surface); color: var(--brand);
+  border: 1.5px solid var(--brand); border-radius: 999px;
+  padding: 7px 14px; font-size: .88em; font-weight: 700; min-height: 38px;
+}
+.mask-btn .mb-state {
+  font-size: .82em; font-weight: 700; line-height: 1.4;
+  padding: 1px 8px; border-radius: 999px;
+  background: var(--surface-alt); color: var(--muted);
+}
+.mask-btn.on { background: var(--brand); color: #fff; }
+.mask-btn.on .mb-state { background: var(--gold); color: #2b2620; }
+/* ダークでは紺が沈むため淡い藍に持ち上げる（モードカードのアイコンと同じ扱い） */
+html[data-color-theme="dark"] .mask-btn { color: #a8bedd; border-color: #a8bedd; }
+html[data-color-theme="dark"] .mask-btn.on { background: #a8bedd; color: #1f2233; border-color: #a8bedd; }
 .material { border-top: 1px dashed var(--line); padding: 12px 0 2px; margin-top: 12px; }
 .material .m-title { font-weight: 600; }
 .material img { max-width: 100%; border-radius: 10px; border: 1px solid var(--line); }

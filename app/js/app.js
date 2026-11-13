@@ -364,10 +364,78 @@
     document.getElementById('btn-reset-records').addEventListener('click', function () {
       if (!window.confirm('学習記録をすべて消去します。よろしいですか？')) return;
       S.resetAll();
+      applyMask(); // 設定初期化に合わせて暗記シート表示も既定（OFF）へ戻す
       document.getElementById('settings-overlay').hidden = true;
       toast('記録を消去しました');
       goHome();
     });
+  }
+
+  /* ---------------- 暗記シート ----------------
+   * 色付き語句（用語リンク・地名リンク）を塗りつぶしブロックにして暗記に使う機能。
+   * 状態は settings.maskSheet に保持し、アプリ全体で共有する（次回起動時も維持、既定はOFF）。
+   * 表示の切替は html.mask-on クラスと CSS のみで行い、リンク自体の生成（linkTerms）は変えない。
+   * ON の間、語句のタップは用語シート／地図を開かず、その語句だけの表示・非表示を切り替える
+   * （捕捉フェーズの委任ハンドラで、各画面が要素に付けた通常のクリック処理より先に処理する）。
+   * 対象外: 穴埋めの解説（.no-mask で囲まれた範囲）とオーバーレイ内（用語シート等）は通常表示のまま。 */
+  function maskOn() { return !!S.state.settings.maskSheet; }
+
+  function applyMask() {
+    var on = maskOn();
+    document.documentElement.classList.toggle('mask-on', on);
+    if (!on) {
+      // OFF に戻したら個別表示の状態はリセットする
+      document.querySelectorAll('a.termlink.revealed, a.placelink.revealed').forEach(function (el) {
+        el.classList.remove('revealed');
+      });
+    }
+  }
+
+  function syncMaskButtons() {
+    var on = maskOn();
+    document.querySelectorAll('[data-mask-btn]').forEach(function (b) {
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      var st = b.querySelector('.mb-state');
+      if (st) st.textContent = on ? 'ON' : 'OFF';
+    });
+  }
+
+  function toggleMask() {
+    S.state.settings.maskSheet = !maskOn();
+    S.saveNow();
+    applyMask();
+    syncMaskButtons();
+    toast(S.state.settings.maskSheet
+      ? '暗記シートON：色付きの語句はタップで表示できます'
+      : '暗記シートOFF');
+  }
+
+  function maskBtnHtml() {
+    var on = maskOn();
+    return '<button type="button" class="mask-btn' + (on ? ' on' : '') + '" data-mask-btn aria-pressed="' +
+      (on ? 'true' : 'false') + '" title="色付きの語句を隠して暗記シートにする">暗記シート' +
+      '<span class="mb-state">' + (on ? 'ON' : 'OFF') + '</span></button>';
+  }
+
+  function bindMask() {
+    // ON/OFFボタン（各対象画面に置かれた [data-mask-btn]）は委任で受ける
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t && t.closest && t.closest('[data-mask-btn]')) toggleMask();
+    });
+    // ON の間の語句タップ: 通常のリンク動作（用語シート・外部地図）を止め、表示だけを切り替える
+    document.addEventListener('click', function (e) {
+      if (!maskOn()) return;
+      var t = e.target;
+      if (!t || !t.closest) return;
+      var el = t.closest('a.termlink, a.placelink');
+      if (!el) return;
+      if (el.closest('.no-mask') || el.closest('.overlay')) return; // 対象外の範囲は通常動作
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.toggle('revealed');
+    }, true);
   }
 
   /* ---------------- 起動 ---------------- */
@@ -375,7 +443,8 @@
     setTitle: setTitle, push: push, back: back, goHome: goHome,
     openTerm: openTerm, openTextSection: openTextSection,
     openViewer: openViewer, toast: toast,
-    rankUpToast: rankUpToast, celebrate: celebrate, getScrollY: currentY
+    rankUpToast: rankUpToast, celebrate: celebrate, getScrollY: currentY,
+    maskBtnHtml: maskBtnHtml, toggleMask: toggleMask, applyMask: applyMask, maskOn: maskOn
   };
 
   function boot() {
@@ -386,6 +455,8 @@
     document.getElementById('btn-search').addEventListener('click', function () { push(renderSearch, '全体検索'); });
     bindSettings();
     bindViewer();
+    bindMask();
+    applyMask(); // 保存済みの暗記シート状態を起動直後から反映する
     applyFont();
     window.JHData.loadAll().then(function () {
       goHome();

@@ -118,7 +118,8 @@
 
   function explainHtml(q, item, pickedId) {
     if (item.kind === 'cloze') {
-      return '<div class="explain"><h4>解説（自動生成）</h4>' +
+      // 穴埋めは暗記シートの対象外（.no-mask: 中のリンク語句は通常表示・通常動作のまま）
+      return '<div class="explain no-mask"><h4>解説（自動生成）</h4>' +
         '<p>空欄に入るのは「' + esc(q.answer) + '」です。</p>' +
         '<p class="small muted">元の文：' + window.JHData.linkTerms(q.source_point) + '</p>' +
         '<div class="chips"><button class="chip term" data-term="' + esc(q.answer) + '">' + esc(q.answer) + ' の用語解説</button>' +
@@ -186,6 +187,7 @@
     h += '<div class="qmeta"><span>' + (cur.idx + 1) + ' / ' + total + ' 問</span>' +
       '<span class="q-left">あと' + rest + '問</span>' +
       '<span class="idlabel">' + esc(item.id) + '</span>' +
+      window.JHApp.maskBtnHtml() +
       '<button class="flag-btn' + (cur.flags[cur.idx] ? ' on' : '') + '" id="q-flag">🚩 見直し</button></span></div>';
     h = h.replace('</span></div>', '</div>');
     var segs = '';
@@ -375,7 +377,8 @@
     var ans = sess.answers[idx];
     var cc = correctChoice(q, item);
     window.JHApp.setTitle('問題の確認');
-    var h = '<div class="qmeta"><span class="idlabel">' + esc(item.id) + '</span></div>';
+    var h = '<div class="qmeta"><span class="idlabel">' + esc(item.id) + '</span>' +
+      window.JHApp.maskBtnHtml() + '</div>';
     h += imageHtml(q, item);
     h += '<div class="qtext">' + esc(qText(q, item)) + '</div>';
     h += '<div class="choices">';

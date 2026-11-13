@@ -314,7 +314,7 @@
       ['body:本文', 'timeline:年表', 'years:年号・語呂', 'desc:模範解答の解説'].map(function (s) {
         var kv = s.split(':');
         return '<button class="chip' + (st.tab === kv[0] ? ' on' : '') + '" data-ttab="' + kv[0] + '">' + kv[1] + '</button>';
-      }).join('') + '</div>';
+      }).join('') + A.maskBtnHtml() + '</div>';
     h += '<div id="text-body"></div>';
     document.getElementById('app-main').innerHTML = h;
     document.querySelectorAll('[data-ttab]').forEach(function (el) {

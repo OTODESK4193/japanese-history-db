@@ -11,7 +11,7 @@
       termStudy: {},       // TERM-ID -> {known:bool, ts}
       yearSelf: {},        // 'year|event|dir' -> {known:bool, ts}（年号カードの自己判定）
       commentary: {},      // key -> {checked:[bool], read:bool}
-      settings: { sessionSize: 10, fontSize: 'std', targetLevel: 'common', theme: 'auto', titleRankShown: null },
+      settings: { sessionSize: 10, fontSize: 'std', targetLevel: 'common', theme: 'auto', titleRankShown: null, maskSheet: false },
       session: null        // 進行中セッション（再開用）
     };
   }
