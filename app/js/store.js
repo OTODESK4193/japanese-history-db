@@ -69,9 +69,16 @@
     return map;
   }
 
-  /* 問題系（hs/jhs/cloze）の復習状況を返す: key -> status */
+  /* 問題系（hs/jhs/cloze）の復習状況を返す: key -> status
+   * 想起ドリル（kind:'recall'）は用語ドリルであり、4択ランナーで扱えないため
+   * 問題の復習には含めない（記録そのものは統計用に保持される）。 */
   function questionReviewMap() {
-    var map = historyByItem(state.attempts);
+    var map = {};
+    state.attempts.forEach(function (a) {
+      if (a.kind !== 'hs' && a.kind !== 'jhs' && a.kind !== 'cloze') return;
+      var key = a.kind + ':' + a.id;
+      (map[key] = map[key] || []).push(a);
+    });
     var out = {};
     Object.keys(map).forEach(function (key) { out[key] = reviewStatus(map[key]); });
     return out;

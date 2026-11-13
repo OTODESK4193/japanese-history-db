@@ -127,39 +127,50 @@
     return '通常';
   }
 
-  /* 用語リンク: 最長一致で本文中の辞書用語をリンク化する（初出のみ）。
+  /* 用語リンク: 最長一致で本文中の辞書用語をリンク化する（全出現が対象）。
+   * 地名（places）は steel 色の ⌖ リンクにする。地名が用語としても登録されて
+   * いる場合は、用語シート（地図リンクを含む）を開く用語リンクを優先する。
    * 戻り値は HTML 文字列。 */
-  var sortedTerms = null;
+  var linkIndex = null; // 先頭文字 -> [{s, type}]（長い順）
+  function buildLinkIndex() {
+    var byChar = {};
+    function add(str, type) {
+      if (!str || str.length < 2) return;
+      var c = str.charAt(0);
+      (byChar[c] = byChar[c] || []).push({ s: str, type: type });
+    }
+    D.glossary.forEach(function (g) { add(g.term, 'term'); });
+    D.places.forEach(function (p) { add(p.name, 'place'); });
+    Object.keys(byChar).forEach(function (c) {
+      byChar[c].sort(function (a, b) { return b.s.length - a.s.length; });
+    });
+    return byChar;
+  }
   function linkTerms(text) {
     if (!text) return '';
-    if (!sortedTerms) {
-      sortedTerms = D.glossary.map(function (g) { return g.term; })
-        .filter(function (t) { return t.length >= 2; })
-        .sort(function (a, b) { return b.length - a.length; });
-    }
-    var matches = []; // {start, end, term}
-    var used = {};
-    sortedTerms.forEach(function (term) {
-      if (used[term]) return;
-      var idx = text.indexOf(term);
-      if (idx < 0) return;
-      // 既存のマッチと重なる場合は、より長い語を優先（sortedTerms は長い順）
-      for (var k = 0; k < matches.length; k++) {
-        var m = matches[k];
-        if (idx < m.end && idx + term.length > m.start) return;
+    if (!linkIndex) linkIndex = buildLinkIndex();
+    var out = '', i = 0, n = text.length;
+    while (i < n) {
+      var cands = linkIndex[text.charAt(i)];
+      var hit = null;
+      if (cands) {
+        for (var k = 0; k < cands.length; k++) {
+          if (text.startsWith(cands[k].s, i)) { hit = cands[k]; break; }
+        }
       }
-      matches.push({ start: idx, end: idx + term.length, term: term });
-      used[term] = true;
-    });
-    if (!matches.length) return esc(text);
-    matches.sort(function (a, b) { return a.start - b.start; });
-    var out = '', pos = 0;
-    matches.forEach(function (m) {
-      out += esc(text.slice(pos, m.start));
-      out += '<a class="termlink" data-term="' + esc(m.term) + '">' + esc(m.term) + '</a>';
-      pos = m.end;
-    });
-    out += esc(text.slice(pos));
+      if (hit) {
+        if (hit.type === 'term') {
+          out += '<a class="termlink" data-term="' + esc(hit.s) + '">' + esc(hit.s) + '</a>';
+        } else {
+          out += '<a class="placelink" href="' + esc(mapsUrl(hit.s)) +
+            '" target="_blank" rel="noopener">⌖' + esc(hit.s) + '</a>';
+        }
+        i += hit.s.length;
+      } else {
+        out += esc(text.charAt(i));
+        i++;
+      }
+    }
     return out;
   }
 

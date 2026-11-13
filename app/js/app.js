@@ -71,7 +71,7 @@
     h += '<div class="btn-row"><button class="btn' + (self && self.known ? '' : ' sub') + '" id="ts-known">覚えた</button>' +
       '<button class="btn' + (self && !self.known ? '' : ' sub') + '" id="ts-unknown">まだ</button></div>';
     if (D.placeSet[t.term]) {
-      h += '<p><a href="' + esc(window.JHData.mapsUrl(t.term)) + '" target="_blank" rel="noopener">📍 Google マップで場所を見る</a></p>';
+      h += '<p><a class="placelink" href="' + esc(window.JHData.mapsUrl(t.term)) + '" target="_blank" rel="noopener">⌖ Google マップで場所を見る</a></p>';
     }
     if (t.sections && t.sections.length) {
       h += '<h4>テキストの該当箇所</h4><div class="chips">' + t.sections.map(function (sec) {

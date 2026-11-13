@@ -112,20 +112,20 @@
     if (item.kind === 'cloze') {
       return '<div class="explain"><h4>解説（自動生成）</h4>' +
         '<p>空欄に入るのは「' + esc(q.answer) + '」です。</p>' +
-        '<p class="small muted">元の文：' + esc(q.source_point) + '</p>' +
+        '<p class="small muted">元の文：' + window.JHData.linkTerms(q.source_point) + '</p>' +
         '<div class="chips"><button class="chip term" data-term="' + esc(q.answer) + '">' + esc(q.answer) + ' の用語解説</button>' +
         '<button class="chip" data-goto-section="' + esc(q.section_ref) + '">テキストで確認する</button></div></div>';
     }
     var ex = q.explanation || {};
     var h = '<div class="explain">';
-    if (ex.summary) h += '<h4>要点</h4><p>' + esc(ex.summary) + '</p>';
-    if (ex.detailed) h += '<h4>詳しい解説</h4><p>' + esc(ex.detailed) + '</p>';
+    if (ex.summary) h += '<h4>要点</h4><p>' + window.JHData.linkTerms(ex.summary) + '</p>';
+    if (ex.detailed) h += '<h4>詳しい解説</h4><p>' + window.JHData.linkTerms(ex.detailed) + '</p>';
     var reasons = ex.incorrect_reasons || {};
     var keys = Object.keys(reasons);
     if (keys.length) {
       h += '<h4>他の選択肢について</h4><ul class="why-list">';
       q.choices.forEach(function (c) {
-        if (reasons[c.id]) h += '<li>「' + esc(c.text) + '」― ' + esc(reasons[c.id]) + '</li>';
+        if (reasons[c.id]) h += '<li>「' + esc(c.text) + '」― ' + window.JHData.linkTerms(reasons[c.id]) + '</li>';
       });
       h += '</ul>';
     }
@@ -268,7 +268,7 @@
       var v = map[k];
       var pct = Math.round(v.correct / v.total * 100);
       h += '<div class="bar-row"><span class="b-lbl">' + esc(k) + '</span>' +
-        '<span class="b-bar"><span style="display:block;width:' + pct + '%;height:100%;background:var(--accent)"></span></span>' +
+        '<span class="b-bar"><span style="display:block;width:' + pct + '%;height:100%;background:var(--moss)"></span></span>' +
         '<span class="b-val">' + v.correct + '/' + v.total + '（' + pct + '%）</span></div>';
     });
     return h;
@@ -382,6 +382,9 @@
 
   function bindExplainActions(root) {
     root.querySelectorAll('[data-term]').forEach(function (el) {
+      el.addEventListener('click', function () { window.JHApp.openTerm(el.getAttribute('data-term')); });
+    });
+    root.querySelectorAll('.termlink').forEach(function (el) {
       el.addEventListener('click', function () { window.JHApp.openTerm(el.getAttribute('data-term')); });
     });
     root.querySelectorAll('[data-goto-section]').forEach(function (el) {

@@ -14,37 +14,60 @@
     var st = S.state;
     var due = S.dueCount();
     var totalAttempts = st.attempts.length + st.yearAttempts.length;
+    var qTotal = st.attempts.length;
+    var qCorrect = st.attempts.filter(function (a) { return a.correct; }).length;
+    var rate = qTotal ? Math.round(qCorrect / qTotal * 100) : null;
     var h = '';
+    // ヒーロー: 学習サマリと次にやることへの導線
+    h += '<section class="hero"><div class="hero-top">' +
+      '<div class="hero-mark">史</div>' +
+      '<div><div class="hero-title">今日の学習</div>' +
+      '<div class="hero-sub">記録はこの端末にだけ保存されます</div></div></div>' +
+      '<div class="hero-stats">' +
+      '<div class="hstat"><div class="hstat-num">' + totalAttempts + '</div><div class="hstat-lbl">総回答数</div></div>' +
+      '<div class="hstat"><div class="hstat-num">' + (rate === null ? '―' : rate + '<span style="font-size:.55em">%</span>') + '</div><div class="hstat-lbl">正答率</div></div>' +
+      '<div class="hstat"><div class="hstat-num' + (due > 0 ? ' accent' : '') + '">' + due + '</div><div class="hstat-lbl">今日の復習</div></div>' +
+      '</div>';
+    if (due > 0) {
+      h += '<button class="hero-due" id="home-due"><span>復習の期限が来ている項目が ' + due + ' 件あります</span><span>›</span></button>';
+    }
     if (st.session && st.session.items && st.session.items.length) {
       var done = Object.keys(st.session.answers || {}).length;
-      h += '<div class="card tap" id="home-resume"><h3>前回の続きがあります</h3>' +
+      h += '<div class="hero-resume" id="home-resume"><div class="hr-title">前回の続きがあります</div>' +
         '<p class="muted small">「' + esc(st.session.title) + '」 ' + (st.session.idx + 1) + '問目／全' + st.session.items.length + '問（回答済み ' + done + '問）</p>' +
         '<button class="btn" id="resume-btn">続きから再開する</button> ' +
         '<button class="btn sub" id="discard-btn">破棄する</button></div>';
     }
-    if (due > 0) {
-      h += '<div class="card tap" id="home-due"><h3>今日の復習：' + due + '件</h3>' +
-        '<p class="muted small">間隔反復で期限が来た項目があります。タップで復習リストへ。</p></div>';
-    }
-    h += '<div class="grid2">' +
-      modeCard('exam', '入試問題', D.hs.length + '問', '形式・分野・難易度で絞り込み可') +
-      modeCard('mock', '模試モード', '32問', '制限時間なし・一括採点') +
-      modeCard('jhs', '中学復習', D.jhs.length + '問', '時代別に中学範囲を復習') +
-      modeCard('cloze', '穴埋め', D.cloze.length + '問', 'テキストから自動生成') +
-      modeCard('cards', '単語帳', D.glossary.length + '語', '弱点デッキ・自己判定つき') +
-      modeCard('dict', '辞書', D.glossary.length + '語', '検索して用語を確認') +
-      modeCard('years', '年号カード', D.years.length + '件', '語呂' + D.years.filter(function (y) { return y.goro; }).length + '件') +
-      modeCard('recall', '想起ドリル', '', '定義から用語を当てる') +
-      modeCard('themes', 'テーマ史', '6テーマ', 'テーマごとに通史演習') +
-      modeCard('trivia', '豆知識', D.trivia.length + '件', '認識状態ラベルつき') +
-      modeCard('review', '復習リスト', due + '件が期限', '間隔反復・卒業は連続2回正解') +
-      modeCard('stats', '成績', totalAttempts + '回回答', '分野・形式・難易度別の内訳') +
+    h += '</section>';
+    // モード: グループ見出しで整理し、主役モードに階層を付ける
+    h += '<h2 class="group-title">問題演習</h2><div class="grid2">' +
+      modeCard('exam', '入試問題', D.hs.length + '問', '形式・分野・難易度で絞り込み可', 'mode-accent') +
+      modeCard('mock', '模試モード', '32問', '制限時間なし・一括採点', 'mode-steel') +
+      modeCard('themes', 'テーマ史', '6テーマ', 'テーマごとに通史演習', '') +
+      modeCard('jhs', '中学復習', D.jhs.length + '問', '時代別に中学範囲を復習', '') +
+      modeCard('cloze', '穴埋め', D.cloze.length + '問', 'テキストから自動生成', '') +
       '</div>';
-    h += '<h2 style="margin:18px 0 8px">単元テキストと単元テスト</h2>';
+    h += '<h2 class="group-title">辞書とカード</h2><div class="grid2">' +
+      modeCard('dict', '辞書', D.glossary.length + '語', '検索して用語を確認', '') +
+      modeCard('cards', '単語帳', D.glossary.length + '語', '弱点デッキ・自己判定つき', '') +
+      modeCard('years', '年号カード', D.years.length + '件', '語呂' + D.years.filter(function (y) { return y.goro; }).length + '件で暗記', '') +
+      modeCard('recall', '想起ドリル', '', '定義から用語を当てる', '') +
+      modeCard('trivia', '豆知識', D.trivia.length + '件', '認識状態ラベルつき', '') +
+      '</div>';
+    h += '<h2 class="group-title">記録と検索</h2><div class="grid2">' +
+      modeCard('review', '復習リスト', due + '件が期限', '間隔反復・卒業は連続2回正解', 'mode-review') +
+      modeCard('stats', '成績', totalAttempts + '回回答', '分野・形式・難易度別の内訳', '') +
+      modeCard('search', '全体検索', '横断検索', '用語・セクション・問題をさがす', '') +
+      '</div>';
+    h += '<h2 class="group-title">単元テキストと単元テスト</h2>';
     D.texts.forEach(function (t) {
       var n = D.hs.filter(function (q) { return unitOf(q) === t.unit_id; }).length;
+      var uAtt = st.attempts.filter(function (a) { return a.kind === 'hs' && a.unit === t.unit_id; });
+      var uRate = uAtt.length ? Math.round(uAtt.filter(function (a) { return a.correct; }).length / uAtt.length * 100) : null;
       h += '<div class="unit-row"><span class="u-no">' + esc(t.unit_id) + '</span>' +
-        '<span class="u-t">' + esc(t.title) + '</span>' +
+        '<span class="u-main"><span class="u-t">' + esc(t.title) + '</span>' +
+        (t.subtitle ? '<span class="u-sub">' + esc(t.subtitle) + '</span>' : '') + '</span>' +
+        (uRate !== null ? '<span class="pill">正答率 ' + uRate + '%</span>' : '') +
         '<button class="chip" data-unit-text="' + t.unit_id + '">テキスト</button>' +
         '<button class="chip" data-unit-test="' + t.unit_id + '">テスト ' + n + '問</button></div>';
     });
@@ -54,9 +77,11 @@
     bindHome();
   }
 
-  function modeCard(mode, label, big, sub) {
-    return '<div class="card tap mode-card" data-mode="' + mode + '"><div class="big">' + esc(big) + '</div>' +
-      '<div style="font-weight:700">' + esc(label) + '</div><div class="lbl">' + esc(sub) + '</div></div>';
+  function modeCard(mode, label, stat, sub, variant) {
+    return '<div class="card tap mode-card' + (variant ? ' ' + variant : '') + '" data-mode="' + mode + '">' +
+      '<div class="mc-label">' + esc(label) + '</div>' +
+      '<div class="mc-sub">' + esc(sub) + '</div>' +
+      (stat ? '<div class="mc-stat">' + esc(stat) + '</div>' : '') + '</div>';
   }
 
   function bindHome() {
@@ -96,6 +121,7 @@
     else if (mode === 'trivia') A.push(function () { V2.renderTrivia(''); }, '豆知識');
     else if (mode === 'review') A.push(V2.renderReview, '復習リスト');
     else if (mode === 'stats') A.push(V2.renderStats, '成績');
+    else if (mode === 'search') document.getElementById('btn-search').click();
   }
 
   function startUnitTest(unitId) {
@@ -357,7 +383,7 @@
         }
         if (ps.source_aux) h += '<p class="small muted">' + esc(ps.source_aux) + '</p>';
       }
-      if (c.model_answer) h += '<h4>模範解答</h4><p style="white-space:pre-wrap">' + esc(c.model_answer) + '</p>';
+      if (c.model_answer) h += '<h4>模範解答</h4><p style="white-space:pre-wrap">' + window.JHData.linkTerms(c.model_answer) + '</p>';
       if (c.elements && c.elements.length) {
         h += '<h4>満点答案の要素（自己チェック）</h4>';
         c.elements.forEach(function (el, ei) {
@@ -369,7 +395,7 @@
       }
       if (c.commentary) {
         var ctext = Array.isArray(c.commentary) ? c.commentary.join('\n') : String(c.commentary);
-        h += '<h4>解説</h4><p style="white-space:pre-wrap">' + esc(ctext) + '</p>';
+        h += '<h4>解説</h4><p style="white-space:pre-wrap">' + window.JHData.linkTerms(ctext) + '</p>';
       }
       if (c.grounding && c.grounding.evidence_level) {
         h += '<p class="small muted">根拠：' + esc(typeof c.grounding.evidence_level === 'string' ? c.grounding.evidence_level : JSON.stringify(c.grounding.evidence_level)) + '</p>';
@@ -393,6 +419,7 @@
       });
     }
     body.innerHTML = h;
+    bindTextActions(body);
     body.querySelectorAll('[data-comm-check]').forEach(function (el) {
       el.addEventListener('change', function () {
         var parts = el.getAttribute('data-comm-check').split(':');
