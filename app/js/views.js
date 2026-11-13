@@ -28,6 +28,16 @@
       '<div class="hstat"><div class="hstat-num">' + (rate === null ? '―' : rate + '<span style="font-size:.55em">%</span>') + '</div><div class="hstat-lbl">正答率</div></div>' +
       '<div class="hstat"><div class="hstat-num' + (due > 0 ? ' accent' : '') + '">' + due + '</div><div class="hstat-lbl">今日の復習</div></div>' +
       '</div>';
+    // 称号: 現在の称号・学習ポイント・次の称号までの進捗
+    var ri = S.rankInfo();
+    h += '<button class="hero-rank" id="home-rank"><span class="hr-rank-lbl">現在の称号</span>' +
+      '<span class="hr-rank-name">' + esc(ri.title.name) + '</span>' +
+      '<span class="hr-rank-pts">学習ポイント ' + ri.breakdown.total + '</span>' +
+      (ri.next
+        ? '<span class="rank-bar"><span style="width:' + Math.round(ri.progress * 100) + '%"></span></span>' +
+          '<span class="hr-rank-next">次の称号「' + esc(ri.next.name) + '」まで あと ' + ri.toNext + ' ポイント</span>'
+        : '<span class="hr-rank-next">最高ランク到達！</span>') +
+      '<span class="hr-rank-go">称号の一覧を見る ›</span></button>';
     if (due > 0) {
       h += '<button class="hero-due" id="home-due"><span>復習の期限が来ている項目が ' + due + ' 件あります</span><span>›</span></button>';
     }
@@ -105,6 +115,30 @@
     });
     var due = document.getElementById('home-due');
     if (due) due.addEventListener('click', function () { A.push(window.JHViews2.renderReview, '復習リスト'); });
+    var rk = document.getElementById('home-rank');
+    if (rk) rk.addEventListener('click', function () { A.push(renderTitles, '称号'); });
+  }
+
+  /* ---------------- 称号一覧 ---------------- */
+  function renderTitles() {
+    A.setTitle('称号');
+    var ri = S.rankInfo();
+    var pts = ri.breakdown.total;
+    var h = '<p class="muted small">学習ポイントに応じて20段階の称号が上がります。ポイントは「正解したことのある問題の種類数＋単語帳で『覚えた』用語数＋年号カードで『思い出せた』年号数」です。</p>' +
+      '<div class="card rank-summary"><div class="hr-rank-lbl">現在の称号</div>' +
+      '<div class="hr-rank-name">' + esc(ri.title.name) + '</div>' +
+      '<p style="margin:6px 0 0">学習ポイント ' + pts + '（問題 ' + ri.breakdown.questions + '種・用語 ' + ri.breakdown.terms + '語・年号 ' + ri.breakdown.years + '件）</p>' +
+      (ri.next ? '<p class="muted small" style="margin:4px 0 0">次の称号「' + esc(ri.next.name) + '」まで あと ' + ri.toNext + ' ポイント</p>' : '') +
+      '</div>';
+    h += S.TITLES.map(function (t, i) {
+      var cls = 'rank-row' + (i === ri.index ? ' current' : (pts >= t.min ? ' reached' : ' locked'));
+      var state = i === ri.index ? '現在' : (pts >= t.min ? '到達済み' : t.min + ' ポイント〜');
+      return '<div class="' + cls + '"><span class="rk-no">' + (i + 1) + '</span>' +
+        '<span class="rk-name">' + esc(t.name) + '</span>' +
+        '<span class="rk-state">' + state + '</span></div>';
+    }).join('');
+    document.getElementById('app-main').innerHTML = h;
+    window.scrollTo(0, 0);
   }
 
   function goMode(mode) {
@@ -450,6 +484,7 @@
 
   window.JHViews = {
     renderHome: renderHome, renderText: renderText, goMode: goMode,
+    renderTitles: renderTitles,
     startUnitTest: startUnitTest, bindTextActions: bindTextActions,
     goroBadge: goroBadge, unitOf: unitOf
   };

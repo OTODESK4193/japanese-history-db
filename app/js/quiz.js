@@ -49,6 +49,14 @@
     };
   }
 
+  /* 称号ランクアップ時の祝福表示（記録の直後に呼ぶ） */
+  function rankUpToast() {
+    var up = S.checkRankUp();
+    if (up) {
+      window.JHApp.toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+    }
+  }
+
   function record(item, correct) {
     var q = getQ(item);
     var m = metaOf(q, item);
@@ -246,6 +254,7 @@
     }
     cur.answers[cur.idx] = { choiceId: choiceId, correct: !!picked.is_correct, graded: true };
     record(item, !!picked.is_correct);
+    rankUpToast();
     persist();
     render();
   }
@@ -296,7 +305,7 @@
         label: item.kind === 'cloze' ? q.answer : (q.question ? q.question.text.slice(0, 40) : item.id)
       });
     });
-    if (cur.mock) persist();
+    if (cur.mock) { persist(); rankUpToast(); }
     var total = rows.length;
     var nCorrect = rows.filter(function (r) { return r.correct; }).length;
     var h = '<div class="card"><h3>結果</h3>' +

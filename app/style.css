@@ -148,6 +148,37 @@ a { color: var(--steel); }
 .hero-resume .hr-title { font-family: var(--mincho); font-weight: 700; font-size: 1.05em; }
 .hero-resume p { margin: 4px 0 10px; }
 
+/* 称号: ヒーロー内の称号ブロック・進捗バー・一覧 */
+.hero-rank {
+  display: block; width: 100%; text-align: left; margin-top: 14px; padding: 13px 14px;
+  background: var(--gold-soft); border: 1.5px solid var(--gold); border-radius: 12px; color: var(--ink);
+}
+.hero-rank:active { filter: brightness(.97); }
+.hr-rank-lbl { display: block; font-size: .72em; color: var(--muted); letter-spacing: .1em; }
+.hr-rank-name { display: block; font-family: var(--mincho); font-weight: 800; font-size: 1.5em; color: var(--accent); line-height: 1.3; }
+.hr-rank-pts { display: block; font-weight: 700; margin-top: 2px; }
+.hr-rank-next { display: block; font-size: .82em; color: var(--muted); margin-top: 2px; }
+.hr-rank-go { display: block; font-size: .8em; font-weight: 700; color: var(--accent); margin-top: 6px; }
+.rank-bar { display: block; height: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin: 9px 0 3px; }
+.rank-bar > span { display: block; height: 100%; background: var(--accent); }
+.rank-row {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px; margin: 0 0 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+}
+.rank-row .rk-no { font-family: var(--mincho); font-weight: 700; color: var(--muted); min-width: 1.6em; text-align: center; }
+.rank-row .rk-name { flex: 1; font-weight: 600; }
+.rank-row .rk-state { font-size: .8em; color: var(--muted); white-space: nowrap; }
+.rank-row.reached .rk-name, .rank-row.current .rk-name { color: var(--accent); font-weight: 700; }
+.rank-row.reached .rk-state { color: var(--moss); font-weight: 700; }
+.rank-row.current { border: 2px solid var(--accent); background: var(--accent-soft); }
+.rank-row.current .rk-state { color: var(--accent); font-weight: 800; }
+.rank-row.locked { opacity: .55; box-shadow: none; }
+.card.rank-summary .hr-rank-name { font-size: 1.6em; }
+@media (prefers-color-scheme: dark) {
+  .hero-rank { background: var(--surface-alt); }
+  .rank-bar { background: var(--surface); }
+}
+
 /* ホーム: グループ見出しとモードカード（ラベル先行・階層つき） */
 .group-title {
   font-size: 1.06em; margin: 24px 0 10px; letter-spacing: .05em;

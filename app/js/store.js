@@ -11,7 +11,7 @@
       termStudy: {},       // TERM-ID -> {known:bool, ts}
       yearSelf: {},        // 'year|event|dir' -> {known:bool, ts}（年号カードの自己判定）
       commentary: {},      // key -> {checked:[bool], read:bool}
-      settings: { sessionSize: 10, fontSize: 'std', targetLevel: 'common' },
+      settings: { sessionSize: 10, fontSize: 'std', targetLevel: 'common', titleRankShown: null },
       session: null        // 進行中セッション（再開用）
     };
   }
@@ -103,6 +103,92 @@
     return n;
   }
 
+  /* ---------------- 称号システム（20段階） ----------------
+   * 学習ポイントは既存の記録からその場で算出する（記録形式は変えない）:
+   *  (1) 正解したことのある問題の種類数（hs/jhs/cloze を通算、同一問題は1回だけ）
+   *  (2) 単語帳で「覚えた」自己判定済みの用語数（termStudy.known）
+   *  (3) 年号カードで「思い出せた」年号数（yearSelf.known、年号×出来事単位で数える）
+   * ランクアップ表示済みの最高ランクだけは設定領域（settings.titleRankShown）に保持する。 */
+  var TITLES = [
+    { min: 0, name: '歴史見習い' },
+    { min: 10, name: '村の語り部' },
+    { min: 25, name: '寺子屋の秀才' },
+    { min: 45, name: '藩校の優等生' },
+    { min: 70, name: '史料の虫' },
+    { min: 100, name: '歴史の旅人' },
+    { min: 140, name: '郷土史ファン' },
+    { min: 190, name: '史料ハンター' },
+    { min: 250, name: '文化財の守り人' },
+    { min: 320, name: '郷土史家' },
+    { min: 400, name: '歴史研究員' },
+    { min: 500, name: '学芸員' },
+    { min: 620, name: '史料解読の達人' },
+    { min: 760, name: '歴史の案内人' },
+    { min: 920, name: '歴史学者' },
+    { min: 1100, name: '日本史の教授' },
+    { min: 1320, name: '歴史博士' },
+    { min: 1580, name: '日本史の生き字引' },
+    { min: 1900, name: '歴史賢者' },
+    { min: 2300, name: '歴史の伝説' }
+  ];
+
+  function pointsBreakdown() {
+    var qset = {};
+    state.attempts.forEach(function (a) {
+      if ((a.kind === 'hs' || a.kind === 'jhs' || a.kind === 'cloze') && a.correct) {
+        qset[a.kind + ':' + a.id] = true;
+      }
+    });
+    var terms = 0;
+    Object.keys(state.termStudy).forEach(function (k) {
+      if (state.termStudy[k] && state.termStudy[k].known) terms++;
+    });
+    var yset = {};
+    Object.keys(state.yearSelf).forEach(function (k) {
+      if (!state.yearSelf[k] || !state.yearSelf[k].known) return;
+      var parts = k.split('|'); // 'year|event|dir' → 方向違いは同じ年号として1件
+      yset[parts[0] + '|' + parts[1]] = true;
+    });
+    var questions = Object.keys(qset).length;
+    var years = Object.keys(yset).length;
+    return { questions: questions, terms: terms, years: years, total: questions + terms + years };
+  }
+
+  function rankIndexFor(pts) {
+    var idx = 0;
+    for (var i = 0; i < TITLES.length; i++) if (pts >= TITLES[i].min) idx = i;
+    return idx;
+  }
+
+  function rankInfo() {
+    var b = pointsBreakdown();
+    var idx = rankIndexFor(b.total);
+    var next = TITLES[idx + 1] || null;
+    return {
+      breakdown: b, index: idx, title: TITLES[idx], next: next,
+      toNext: next ? next.min - b.total : 0,
+      progress: next ? (b.total - TITLES[idx].min) / (next.min - TITLES[idx].min) : 1
+    };
+  }
+
+  /* 記録直後に呼ぶ。表示済みランクを超えたら新ランク情報を返し（呼び出し側が祝福表示を出す）、
+   * そうでなければ null を返す。初回は現在ランクを静かに表示済みとして初期化する。 */
+  function checkRankUp() {
+    var info = rankInfo();
+    var shown = state.settings.titleRankShown;
+    if (shown === null || shown === undefined) {
+      state.settings.titleRankShown = info.index;
+      saveNow();
+      return null;
+    }
+    if (info.index > shown) {
+      state.settings.titleRankShown = info.index;
+      saveNow();
+      return info;
+    }
+    return null;
+  }
+
   window.JHStore = {
     state: state,
     save: save,
@@ -112,6 +198,11 @@
     yearReviewMap: yearReviewMap,
     dueCount: dueCount,
     DAY: DAY,
+    TITLES: TITLES,
+    pointsBreakdown: pointsBreakdown,
+    rankIndexFor: rankIndexFor,
+    rankInfo: rankInfo,
+    checkRankUp: checkRankUp,
     recordAttempt: function (a) { state.attempts.push(a); save(); },
     recordYearAttempt: function (a) { state.yearAttempts.push(a); save(); },
     resetAll: function () {

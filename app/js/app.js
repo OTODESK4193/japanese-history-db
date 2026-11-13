@@ -111,7 +111,9 @@
   function judgeTerm(t, known) {
     S.state.termStudy[t.id] = { known: known, ts: Date.now() };
     S.save();
-    toast(known ? '「覚えた」に記録しました' : '「まだ」に記録しました');
+    var up = S.checkRankUp();
+    if (up) toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+    else toast(known ? '「覚えた」に記録しました' : '「まだ」に記録しました');
     openTerm(t.term);
   }
 

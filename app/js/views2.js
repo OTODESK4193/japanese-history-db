@@ -9,6 +9,14 @@
   var V = window.JHViews;
   var unitOf = V.unitOf;
 
+  /* 称号ランクアップ時の祝福表示（自己判定の記録直後に呼ぶ） */
+  function rankUpToast() {
+    var up = S.checkRankUp();
+    if (up) {
+      A.toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+    }
+  }
+
   /* ---------------- 入試問題（絞り込み） ---------------- */
   var TYPES = ['通常', '整序', '会話・探究', '複数資料', '地図・図表', '写真・図版'];
   var examState = { types: {}, topic: '', diffs: {}, unit: '' };
@@ -243,6 +251,7 @@
       var t = cards[i];
       S.state.termStudy[t.id] = { known: known, ts: Date.now() };
       S.save();
+      rankUpToast();
       i++; flipped = false; draw();
     }
     draw();
@@ -377,6 +386,7 @@
         var key = yearKey(y, dir);
         S.state.yearSelf[key] = { known: known, ts: Date.now() };
         S.recordYearAttempt({ key: key, year: y.year, dir: dir, correct: known, ts: Date.now() });
+        rankUpToast();
         i++; flipped = false; draw();
       }
     }
@@ -575,6 +585,7 @@
         var key = y.year + '|' + y.event + '|' + c.dir;
         S.state.yearSelf[key] = { known: known, ts: Date.now() };
         S.recordYearAttempt({ key: key, year: y.year, dir: c.dir, correct: known, ts: Date.now() });
+        rankUpToast();
         i++; flipped = false; draw();
       }
     }
@@ -586,7 +597,15 @@
     A.setTitle('成績');
     var atts = S.state.attempts;
     var total = atts.length, correct = atts.filter(function (a) { return a.correct; }).length;
-    var h = '<div class="card"><h3>概要</h3><p>問題への回答：' + total + '回（正答率 ' +
+    var ri = S.rankInfo();
+    var h = '<div class="card rank-summary"><h3>称号</h3>' +
+      '<div class="hr-rank-name">' + esc(ri.title.name) + '</div>' +
+      '<p style="margin:6px 0 0">学習ポイント：' + ri.breakdown.total + '（問題 ' + ri.breakdown.questions + '種・用語 ' + ri.breakdown.terms + '語・年号 ' + ri.breakdown.years + '件）</p>' +
+      (ri.next
+        ? '<p class="muted small" style="margin:4px 0 0">次の称号「' + esc(ri.next.name) + '」まで あと ' + ri.toNext + ' ポイント</p>'
+        : '<p class="muted small" style="margin:4px 0 0">最高ランクに到達しています</p>') +
+      '<div class="btn-row"><button class="btn sub" id="st-titles">称号の一覧を見る</button></div></div>';
+    h += '<div class="card"><h3>概要</h3><p>問題への回答：' + total + '回（正答率 ' +
       (total ? Math.round(correct / total * 100) : 0) + '%）<br>年号カード：' + S.state.yearAttempts.length + '回<br>' +
       '単語帳で「覚えた」：' + Object.keys(S.state.termStudy).filter(function (k) { return S.state.termStudy[k].known; }).length + '語</p></div>';
     function groupHtml(title, keyFn, filterKinds) {
@@ -644,6 +663,8 @@
     }
     document.getElementById('app-main').innerHTML = h;
     window.scrollTo(0, 0);
+    var stb = document.getElementById('st-titles');
+    if (stb) stb.addEventListener('click', function () { A.push(V.renderTitles, '称号'); });
   }
 
   window.JHViews2 = {
