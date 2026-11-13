@@ -11,7 +11,7 @@
       termStudy: {},       // TERM-ID -> {known:bool, ts}
       yearSelf: {},        // 'year|event|dir' -> {known:bool, ts}（年号カードの自己判定）
       commentary: {},      // key -> {checked:[bool], read:bool}
-      settings: { sessionSize: 10, fontSize: 'std', targetLevel: 'common', titleRankShown: null },
+      settings: { sessionSize: 10, fontSize: 'std', targetLevel: 'common', theme: 'auto', titleRankShown: null },
       session: null        // 進行中セッション（再開用）
     };
   }
@@ -25,6 +25,40 @@
       state.settings = Object.assign(freshState().settings, parsed.settings || {});
     }
   } catch (e) { /* 壊れた記録は初期化する */ }
+
+  /* テーマ（ライト／ダーク／端末に合わせる）。
+   * 最終的な見た目は html[data-color-theme="light"|"dark"] で決まり、CSS変数はそちらで切り替わる。
+   * （属性名はテーマ史ボタンの data-theme と衝突させないため data-color-theme とする）
+   * 手動選択（light/dark）が OS の prefers-color-scheme より優先され、
+   * 「端末に合わせる」(auto) のときだけ OS 設定に従い、OS 側の変更にも追随する。
+   * 起動直後（描画前）に一度適用するため、このファイルの読み込み時点で実行する。 */
+  function themeMedia() {
+    try { return window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null; }
+    catch (e) { return null; }
+  }
+  function resolveTheme() {
+    var pref = state.settings.theme || 'auto';
+    if (pref === 'dark') return 'dark';
+    if (pref === 'light') return 'light';
+    var mq = themeMedia();
+    return mq && mq.matches ? 'dark' : 'light';
+  }
+  function applyTheme() {
+    var resolved = resolveTheme();
+    document.documentElement.setAttribute('data-color-theme', resolved);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#171410' : '#faf7f2');
+  }
+  applyTheme();
+  (function watchOsTheme() {
+    var mq = themeMedia();
+    if (!mq) return;
+    var onChange = function () {
+      if ((state.settings.theme || 'auto') === 'auto') applyTheme();
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  })();
 
   var saveTimer = null;
   function save() {
@@ -193,6 +227,7 @@
     state: state,
     save: save,
     saveNow: saveNow,
+    applyTheme: applyTheme,
     reviewStatus: reviewStatus,
     questionReviewMap: questionReviewMap,
     yearReviewMap: yearReviewMap,
@@ -209,6 +244,7 @@
       state = freshState();
       window.JHStore.state = state;
       saveNow();
+      applyTheme();
     }
   };
 })();

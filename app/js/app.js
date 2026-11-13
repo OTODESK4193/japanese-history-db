@@ -332,6 +332,9 @@
     document.querySelectorAll('#set-level button').forEach(function (b) {
       b.classList.toggle('on', b.getAttribute('data-v') === st.targetLevel);
     });
+    document.querySelectorAll('#set-theme button').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-v') === (st.theme || 'auto'));
+    });
   }
   function applyFont() {
     document.documentElement.dataset.font = S.state.settings.fontSize === 'large' ? 'large' : 'std';
@@ -357,6 +360,7 @@
     seg('set-size', function (v) { S.state.settings.sessionSize = Number(v); S.save(); });
     seg('set-font', function (v) { S.state.settings.fontSize = v; S.save(); applyFont(); });
     seg('set-level', function (v) { S.state.settings.targetLevel = v; S.save(); });
+    seg('set-theme', function (v) { S.state.settings.theme = v; S.save(); S.applyTheme(); });
     document.getElementById('btn-reset-records').addEventListener('click', function () {
       if (!window.confirm('学習記録をすべて消去します。よろしいですか？')) return;
       S.resetAll();

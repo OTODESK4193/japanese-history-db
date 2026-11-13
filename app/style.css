@@ -35,8 +35,10 @@
 }
 html[data-font="large"] { --fs: 18px; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+/* ダーク配色: 最終的な見た目は html[data-color-theme="dark"] で決まる（設定「テーマ」で解決した値）。
+ * 手動選択が OS 設定より優先され、「端末に合わせる」のときだけ JS が prefers-color-scheme を見て data-color-theme を設定する。
+ * （属性名は data-color-theme: テーマ史ボタンの data-theme 属性と衝突させないため） */
+html[data-color-theme="dark"] {
     color-scheme: dark;
     --bg: #171410;
     --surface: #221e17;
@@ -57,7 +59,6 @@ html[data-font="large"] { --fs: 18px; }
     --warn: #d9a84a;
     --chip: #2b2619;
     --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 12px 32px -16px rgba(0, 0, 0, .6);
-  }
 }
 
 * { box-sizing: border-box; }
@@ -174,10 +175,8 @@ a { color: var(--steel); }
 .rank-row.current .rk-state { color: var(--accent); font-weight: 800; }
 .rank-row.locked { opacity: .55; box-shadow: none; }
 .card.rank-summary .hr-rank-name { font-size: 1.6em; }
-@media (prefers-color-scheme: dark) {
-  .hero-rank { background: var(--surface-alt); }
-  .rank-bar { background: var(--surface); }
-}
+html[data-color-theme="dark"] .hero-rank { background: var(--surface-alt); }
+html[data-color-theme="dark"] .rank-bar { background: var(--surface); }
 
 /* ホーム: グループ見出しとモードカード（ラベル先行・階層つき） */
 .group-title {
@@ -197,11 +196,9 @@ a { color: var(--steel); }
 .mode-card.mode-steel .mc-stat { color: #fff; }
 .mode-card.mode-review { border: 2px solid var(--accent); }
 .mode-card.mode-review .mc-label { color: var(--accent); }
-@media (prefers-color-scheme: dark) {
-  .mode-card.mode-steel { color: #10222b; }
-  .mode-card.mode-steel .mc-sub { color: rgba(16, 34, 43, .75); }
-  .mode-card.mode-steel .mc-stat { color: #10222b; }
-}
+html[data-color-theme="dark"] .mode-card.mode-steel { color: #10222b; }
+html[data-color-theme="dark"] .mode-card.mode-steel .mc-sub { color: rgba(16, 34, 43, .75); }
+html[data-color-theme="dark"] .mode-card.mode-steel .mc-stat { color: #10222b; }
 
 /* 単元リスト */
 .unit-row {
@@ -238,9 +235,7 @@ a { color: var(--steel); }
 .badge.created { background: #fdeeda; color: #8a5410; border: 1px solid #eccfa0; }
 .badge.warn { background: var(--ng-soft); color: var(--warn); border: 1px solid var(--warn); }
 .badge.auto { background: var(--surface-alt); color: var(--muted); border: 1px solid var(--line); }
-@media (prefers-color-scheme: dark) {
-  .badge.created { background: #3d2f16; color: #e0aa4e; border-color: #8a6a25; }
-}
+html[data-color-theme="dark"] .badge.created { background: #3d2f16; color: #e0aa4e; border-color: #8a6a25; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -403,13 +398,11 @@ body {
   background-position: 0 0, 11px 17px, 0 0;
   background-attachment: scroll, scroll, scroll;
 }
-@media (prefers-color-scheme: dark) {
-  body {
+html[data-color-theme="dark"] body {
     background-image:
       radial-gradient(rgba(240, 230, 200, .028) 1px, transparent 1.3px),
       radial-gradient(rgba(240, 230, 200, .020) 1px, transparent 1.3px),
       linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0) 240px);
-  }
 }
 
 /* 青海波の透かし（ヒーロー）: インラインSVGパターンをごく薄く敷く */
@@ -420,7 +413,7 @@ body {
   background-size: 60px 30px;
 }
 .hero > * { position: relative; }
-@media (prefers-color-scheme: dark) { .hero::before { opacity: .07; } }
+html[data-color-theme="dark"] .hero::before { opacity: .07; }
 
 /* ヘッダーの線画アイコン */
 .hicon { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; display: block; }
@@ -471,7 +464,7 @@ body {
 .wc-day.studied .wc-mark { color: var(--accent); }
 .wc-day.studied .wc-date { color: var(--accent); }
 .wc-day.today { border-color: var(--gold); background: var(--gold-soft); }
-@media (prefers-color-scheme: dark) { .wc-day.today { background: var(--surface-alt); } }
+html[data-color-theme="dark"] .wc-day.today { background: var(--surface-alt); }
 
 /* セグメント型プログレス（問題画面） */
 .segbar { display: flex; gap: 3px; margin: 2px 0 12px; }
