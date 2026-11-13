@@ -1,6 +1,9 @@
-/* 日本史学習アプリ（静的PWA版）— デザイン刷新 v2
+/* 日本史学習アプリ（静的PWA版）— デザイン刷新 v2＋和風強化 v3（ビルド v14）
  * ホスト型アプリのデザインシステムに統一:
  * 和紙トーンの地色／赤レンガの主アクセント／moss・steel の補助色／見出しは明朝。
+ * v3: 和紙テクスチャと青海波（--seigaiha）を視認できる濃さに引き上げ、ヒーロー以外
+ * （見出し・単元カード縁・問題/テキスト画面ヘッダー・アプリヘッダー）へ展開。
+ * ダークは真っ黒ではなく温かい濃紺墨色＋金の青海波。家紋風の円形バッジと縦書きも追加。
  * Webフォント (Shippori Mincho) はオンライン時のみ効き、オフラインでは端末の明朝に落ちる。 */
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&display=swap');
 
@@ -8,7 +11,11 @@
 
 :root {
   color-scheme: light;
-  --bg: #faf7f2;
+  --bg: #f8f0de;
+  /* 青海波パターン（和風強化 v3）: ライトは紺の線。ヒーロー・帯・カード縁で共用する */
+  --seigaiha: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cg fill='none' stroke='%231f2a5a'%3E%3Ccircle cx='0' cy='30' r='14'/%3E%3Ccircle cx='30' cy='30' r='14'/%3E%3Ccircle cx='60' cy='30' r='14'/%3E%3Ccircle cx='15' cy='15' r='14'/%3E%3Ccircle cx='45' cy='15' r='14'/%3E%3Ccircle cx='0' cy='30' r='9'/%3E%3Ccircle cx='30' cy='30' r='9'/%3E%3Ccircle cx='60' cy='30' r='9'/%3E%3Ccircle cx='15' cy='15' r='9'/%3E%3Ccircle cx='45' cy='15' r='9'/%3E%3Ccircle cx='0' cy='30' r='4'/%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3Ccircle cx='60' cy='30' r='4'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Ccircle cx='45' cy='15' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  --wa-hero-op: .15;
+  --wa-band-op: .16;
   --surface: #ffffff;
   --surface-alt: #f3ede3;
   --ink: #2b2620;
@@ -40,24 +47,29 @@ html[data-font="large"] { --fs: 18px; }
  * （属性名は data-color-theme: テーマ史ボタンの data-theme 属性と衝突させないため） */
 html[data-color-theme="dark"] {
     color-scheme: dark;
-    --bg: #171410;
-    --surface: #221e17;
-    --surface-alt: #2b2619;
+    /* 和風強化 v3: 真っ黒ではなく温かみのある濃紺墨色。カード面も温かい暗色に持ち上げる */
+    --bg: #1f2233;
+    --seigaiha: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cg fill='none' stroke='%23c8a24a'%3E%3Ccircle cx='0' cy='30' r='14'/%3E%3Ccircle cx='30' cy='30' r='14'/%3E%3Ccircle cx='60' cy='30' r='14'/%3E%3Ccircle cx='15' cy='15' r='14'/%3E%3Ccircle cx='45' cy='15' r='14'/%3E%3Ccircle cx='0' cy='30' r='9'/%3E%3Ccircle cx='30' cy='30' r='9'/%3E%3Ccircle cx='60' cy='30' r='9'/%3E%3Ccircle cx='15' cy='15' r='9'/%3E%3Ccircle cx='45' cy='15' r='9'/%3E%3Ccircle cx='0' cy='30' r='4'/%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3Ccircle cx='60' cy='30' r='4'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Ccircle cx='45' cy='15' r='4'/%3E%3C/g%3E%3C/svg%3E");
+    --wa-hero-op: .12;
+    --wa-band-op: .13;
+    --surface: #292c3e;
+    --surface-alt: #343849;
+    --gold-soft: #3a3115;
     --ink: #f2ecdd;
-    --muted: #a79c86;
+    --muted: #aca48e;
     --accent: #e0685a;
     --accent-soft: #40271f;
     --moss: #8fb573;
     --moss-soft: #26351f;
     --steel: #7ba7b8;
     --steel-soft: #22333b;
-    --line: #403828;
+    --line: #484d68;
     --ok: #5cb877;
     --ok-soft: #1f3524;
     --ng: #e0685a;
     --ng-soft: #40271f;
     --warn: #d9a84a;
-    --chip: #2b2619;
+    --chip: #343849;
     --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 12px 32px -16px rgba(0, 0, 0, .6);
 }
 
@@ -84,6 +96,12 @@ a { color: var(--steel); }
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   padding: calc(6px + env(safe-area-inset-top)) 10px 6px;
+}
+/* アプリヘッダー下端の青海波帯（和風強化 v3） */
+#app-header::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px;
+  background-image: var(--seigaiha); background-size: 44px 22px;
+  opacity: var(--wa-band-op); pointer-events: none;
 }
 #header-title {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
@@ -125,10 +143,12 @@ a { color: var(--steel); }
 }
 .hero-top { display: flex; align-items: center; gap: 12px; }
 .hero-mark {
-  width: 42px; height: 42px; flex: none; border-radius: 11px;
+  /* 家紋風の円形バッジ: 紺地＋金の二重リング（和風強化 v3） */
+  width: 52px; height: 52px; flex: none; border-radius: 50%;
   background: var(--brand); color: #f6f4ee; border: 1.5px solid var(--gold);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--gold);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--mincho); font-weight: 700; font-size: 1.25em;
+  font-family: var(--mincho); font-weight: 700; font-size: 1.4em;
 }
 .hero-title { font-family: var(--mincho); font-weight: 700; font-size: 1.22em; letter-spacing: .03em; }
 .hero-sub { color: var(--muted); font-size: .8em; margin-top: 1px; }
@@ -184,6 +204,12 @@ html[data-color-theme="dark"] .rank-bar { background: var(--surface); }
   display: flex; align-items: center; gap: 8px;
 }
 .group-title::before { content: ""; width: 9px; height: 9px; background: var(--accent); border-radius: 2px; flex: none; }
+/* セクション見出しの右へ伸びる青海波帯（和風強化 v3） */
+.group-title::after {
+  content: ""; flex: 1; height: 12px; border-radius: 2px;
+  background-image: var(--seigaiha); background-size: 44px 22px;
+  opacity: var(--wa-band-op);
+}
 .mode-card { display: flex; flex-direction: column; gap: 3px; padding: 15px 15px 13px; }
 .mode-card .mc-label { font-family: var(--mincho); font-weight: 700; font-size: 1.13em; line-height: 1.3; }
 .mode-card .mc-sub { color: var(--muted); font-size: .8em; line-height: 1.45; }
@@ -202,11 +228,18 @@ html[data-color-theme="dark"] .mode-card.mode-steel .mc-stat { color: #10222b; }
 
 /* 単元リスト */
 .unit-row {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
   background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
   box-shadow: var(--shadow);
-  padding: 12px 14px; margin: 0 0 8px; color: var(--ink);
+  padding: 17px 14px 12px; margin: 0 0 8px; color: var(--ink);
   flex-wrap: wrap;
+}
+/* 単元カード上端の縁に青海波（和風強化 v3） */
+.unit-row::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 9px;
+  background-image: var(--seigaiha); background-size: 44px 22px;
+  opacity: var(--wa-band-op); pointer-events: none;
 }
 .unit-row .u-no { font-family: var(--mincho); font-weight: 700; color: var(--accent); min-width: 2.6em; font-size: 1.02em; }
 .unit-row .u-main { flex: 1; min-width: 9em; display: flex; flex-direction: column; }
@@ -249,7 +282,13 @@ html[data-color-theme="dark"] .badge.created { background: #3d2f16; color: #e0aa
 .danger-btn { background: var(--surface); color: var(--ng); border: 1px solid var(--ng); border-radius: 10px; padding: 10px 14px; min-height: 44px; }
 
 /* quiz */
-.qmeta { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: .85em; margin-bottom: 6px; }
+.qmeta { position: relative; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: .85em; margin-bottom: 6px; padding-top: 14px; }
+/* 問題・カード画面のヘッダー上に青海波帯（和風強化 v3） */
+.qmeta::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+  background-image: var(--seigaiha); background-size: 44px 22px;
+  opacity: var(--wa-band-op); pointer-events: none;
+}
 .qtext { font-size: 1.06em; font-weight: 600; white-space: pre-wrap; margin: 6px 0 12px; }
 .qimg { margin: 8px 0; text-align: center; }
 .qimg img, .qimg .svgbox { max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
@@ -280,8 +319,15 @@ html[data-color-theme="dark"] .badge.created { background: #3d2f16; color: #e0aa
 /* text view */
 .sec-nav { position: sticky; top: 60px; z-index: 20; background: var(--bg); padding: 6px 0; }
 .text-section {
+  position: relative; overflow: hidden;
   background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-  box-shadow: var(--shadow); padding: 18px 16px; margin: 0 0 14px;
+  box-shadow: var(--shadow); padding: 24px 16px 18px; margin: 0 0 14px;
+}
+/* テキスト画面の節カード上端に青海波（和風強化 v3） */
+.text-section::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 9px;
+  background-image: var(--seigaiha); background-size: 44px 22px;
+  opacity: var(--wa-band-op); pointer-events: none;
 }
 .text-section h2 { font-size: 1.14em; margin: 0 0 10px; color: var(--ink); }
 .text-section h2 .idlabel { font-family: ui-monospace, monospace; }
@@ -329,6 +375,8 @@ a.placelink {
 .seg { display: flex; gap: 6px; flex-wrap: wrap; }
 .seg button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 10px 14px; min-height: 44px; }
 .seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* ビルド識別子（設定シート末尾・最新版かどうかの判別用） */
+.build-id { text-align: center; color: var(--muted); font-size: .75em; letter-spacing: .06em; margin: 26px 0 2px; }
 
 /* viewer */
 #viewer-overlay { position: fixed; inset: 0; z-index: 80; background: #11131c; color: #fff; display: flex; flex-direction: column; }
@@ -388,35 +436,43 @@ details.analysis summary { cursor: pointer; font-weight: 600; }
 
 /* ============ GUI垢抜け v3（和モダンの質感・統一アイコン・動き） ============ */
 
-/* 和紙テクスチャ: CSSのみの微細な繊維ドット（外部画像なし・オフラインでも効く） */
+/* 和紙テクスチャ: CSSのみの繊維ドット＋温かい染み（外部画像なし・オフラインでも効く）
+ * 和風強化 v3: ドットを 0.15／0.11 まで濃くし、紙の質感が読めるようにした */
 body {
   background-image:
-    radial-gradient(rgba(122, 90, 40, .030) 1px, transparent 1.3px),
-    radial-gradient(rgba(122, 90, 40, .022) 1px, transparent 1.3px),
+    radial-gradient(rgba(122, 90, 40, .15) 1px, transparent 1.3px),
+    radial-gradient(rgba(122, 90, 40, .11) 1px, transparent 1.3px),
+    radial-gradient(ellipse 90% 340px at 15% -60px, rgba(198, 158, 88, .12), transparent 70%),
     linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 240px);
-  background-size: 22px 22px, 34px 34px, 100% 240px;
-  background-position: 0 0, 11px 17px, 0 0;
-  background-attachment: scroll, scroll, scroll;
+  background-size: 22px 22px, 34px 34px, 100% 340px, 100% 240px;
+  background-position: 0 0, 11px 17px, 0 0, 0 0;
+  background-attachment: scroll, scroll, scroll, scroll;
 }
 html[data-color-theme="dark"] body {
     background-image:
-      radial-gradient(rgba(240, 230, 200, .028) 1px, transparent 1.3px),
-      radial-gradient(rgba(240, 230, 200, .020) 1px, transparent 1.3px),
-      linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0) 240px);
+      radial-gradient(rgba(238, 228, 196, .11) 1px, transparent 1.3px),
+      radial-gradient(rgba(238, 228, 196, .075) 1px, transparent 1.3px),
+      radial-gradient(ellipse 90% 340px at 15% -60px, rgba(110, 130, 190, .08), transparent 70%),
+      linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 240px);
 }
 
-/* 青海波の透かし（ヒーロー）: インラインSVGパターンをごく薄く敷く */
+/* 青海波の透かし（ヒーロー）: --seigaiha パターンを敷く（和風強化 v3 で視認できる濃さに） */
 .hero { position: relative; overflow: hidden; }
 .hero::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cg fill='none' stroke='%233e5c6b'%3E%3Ccircle cx='0' cy='30' r='14'/%3E%3Ccircle cx='30' cy='30' r='14'/%3E%3Ccircle cx='60' cy='30' r='14'/%3E%3Ccircle cx='15' cy='15' r='14'/%3E%3Ccircle cx='45' cy='15' r='14'/%3E%3Ccircle cx='0' cy='30' r='9'/%3E%3Ccircle cx='30' cy='30' r='9'/%3E%3Ccircle cx='60' cy='30' r='9'/%3E%3Ccircle cx='15' cy='15' r='9'/%3E%3Ccircle cx='45' cy='15' r='9'/%3E%3Ccircle cx='0' cy='30' r='4'/%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3Ccircle cx='60' cy='30' r='4'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Ccircle cx='45' cy='15' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: var(--wa-hero-op);
+  background-image: var(--seigaiha);
   background-size: 60px 30px;
 }
 .hero > * { position: relative; }
-html[data-color-theme="dark"] .hero::before { opacity: .07; }
+/* ヒーロー右肩の縦書きアクセント（和風強化 v3） */
+.hero::after {
+  content: "日本史"; position: absolute; top: 14px; right: 12px; pointer-events: none;
+  writing-mode: vertical-rl; font-family: var(--mincho); font-weight: 700;
+  font-size: .8em; letter-spacing: .42em; color: var(--gold); opacity: .55;
+}
 
-/* ヘッダーの線画アイコン */
-.hicon { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; display: block; }
+/* ヘッダーの線画アイコン（和風強化 v3 で拡大） */
+.hicon { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; display: block; }
 .hicon .s { stroke: var(--accent); }
 
 /* 起動スプラッシュ: アイコンのロゴが静かに浮かぶ */
@@ -429,10 +485,12 @@ html[data-color-theme="dark"] .hero::before { opacity: .07; }
   50% { transform: translateY(-7px); }
 }
 
-/* モードカードの統一線画アイコン（紺＋朱の2色） */
+/* モードカードの統一線画アイコン（紺＋朱の2色・和風強化 v3 で拡大） */
 .mc-head { display: flex; align-items: flex-start; gap: 10px; }
-.mc-icon { flex: none; width: 30px; height: 30px; color: var(--brand); margin-top: 1px; }
-.mc-icon svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mc-icon { flex: none; width: 38px; height: 38px; color: var(--brand); margin-top: 1px; }
+.mc-icon svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* ダークでは紺アイコンが沈むため、通常カードのみ淡い藍に持ち上げる（朱の差し色は維持） */
+html[data-color-theme="dark"] .mode-card:not(.mode-accent):not(.mode-steel):not(.mode-review) .mc-icon { color: #a8bedd; }
 .mc-icon .s { stroke: var(--accent); }
 .mc-icon .f { fill: var(--accent); stroke: none; }
 .mode-accent .mc-icon, .mode-steel .mc-icon { color: #fff; }
