@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#1f2a5a"/>
+  <rect x="36" y="36" width="440" height="440" rx="72" fill="none" stroke="#c8a24a" stroke-width="10"/>
+  <text x="256" y="345" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif CJK JP',serif" font-weight="bold" font-size="290" fill="#f6f4ee">史</text>
+</svg>

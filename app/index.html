@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日本史学習アプリ</title>
+<meta name="description" content="日本史（高校・中学復習）の学習アプリ。記録は端末内に保存されます。">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="theme-color" content="#1f2a5a">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header id="app-header">
+  <button id="btn-back" class="hbtn" aria-label="戻る" hidden>‹</button>
+  <div id="header-title">日本史学習アプリ</div>
+  <button id="btn-search" class="hbtn" aria-label="検索">🔍</button>
+  <button id="btn-settings" class="hbtn" aria-label="設定">⚙</button>
+</header>
+
+<main id="app-main">
+  <div id="loading" class="loading-box">
+    <p>読み込み中…</p>
+    <p class="muted small">初回はデータ（問題・テキスト・辞書）を読み込むため、少し時間がかかります。</p>
+  </div>
+</main>
+
+<!-- 設定オーバーレイ -->
+<div id="settings-overlay" class="overlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2>設定</h2>
+      <button class="hbtn close-x" data-close="settings-overlay" aria-label="閉じる">✕</button>
+    </div>
+    <div class="setting-row">
+      <label>1セッションの出題数</label>
+      <div class="seg" id="set-size">
+        <button data-v="5">5問</button><button data-v="10">10問</button><button data-v="20">20問</button>
+      </div>
+      <p class="muted small">単元テスト・入試問題・穴埋め・想起ドリルに適用されます（模試は32問固定、中学復習・復習リストは対象全件が上限です）。</p>
+    </div>
+    <div class="setting-row">
+      <label>文字サイズ</label>
+      <div class="seg" id="set-font">
+        <button data-v="std">標準</button><button data-v="large">大きめ</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <label>志望レベル</label>
+      <div class="seg" id="set-level">
+        <button data-v="common">共通テスト中心</button><button data-v="hard">難関二次中心</button>
+      </div>
+      <p class="muted small">入試問題モードの出題優先度（基礎・発展／発展・難関）に反映されます。</p>
+    </div>
+    <div class="setting-row">
+      <label>学習記録</label>
+      <p class="muted small">記録はこの端末のブラウザ内に保存されます。サーバーには送信されません。</p>
+      <button id="btn-reset-records" class="danger-btn">記録をすべて消去する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 用語シート -->
+<div id="term-overlay" class="overlay" hidden>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="term-title">用語</h2>
+      <button class="hbtn close-x" data-close="term-overlay" aria-label="閉じる">✕</button>
+    </div>
+    <div id="term-body"></div>
+  </div>
+</div>
+
+<!-- 画像ビューア -->
+<div id="viewer-overlay" hidden>
+  <div id="viewer-bar">
+    <span id="viewer-title"></span>
+    <button id="viewer-close" class="hbtn" aria-label="閉じる">✕</button>
+  </div>
+  <div id="viewer-stage">
+    <div id="viewer-content"></div>
+  </div>
+  <div id="viewer-caption"></div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script src="./js/store.js"></script>
+<script src="./js/data.js"></script>
+<script src="./js/quiz.js"></script>
+<script src="./js/app.js"></script>
+<script src="./js/views.js"></script>
+<script src="./js/views2.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () { /* SWなしでも動作する */ });
+  });
+}
+</script>
+</body>
+</html>
