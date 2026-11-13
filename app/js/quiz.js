@@ -53,7 +53,7 @@
   function rankUpToast() {
     var up = S.checkRankUp();
     if (up) {
-      window.JHApp.toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+      window.JHApp.rankUpToast(up); // トースト＋金粉・桜の祝福アニメーション
     }
   }
 
@@ -181,12 +181,19 @@
     var ans = cur.answers[cur.idx];
     var graded = !cur.mock && ans && ans.graded;
     var total = cur.items.length;
+    var rest = graded ? total - cur.idx - 1 : total - cur.idx; // 残り問数（採点済みなら現在の問題を除く）
     var h = '';
     h += '<div class="qmeta"><span>' + (cur.idx + 1) + ' / ' + total + ' 問</span>' +
+      '<span class="q-left">あと' + rest + '問</span>' +
       '<span class="idlabel">' + esc(item.id) + '</span>' +
       '<button class="flag-btn' + (cur.flags[cur.idx] ? ' on' : '') + '" id="q-flag">🚩 見直し</button></span></div>';
     h = h.replace('</span></div>', '</div>');
-    h += '<div class="progressbar"><div style="width:' + Math.round(cur.idx / total * 100) + '%"></div></div>';
+    var segs = '';
+    for (var si = 0; si < total; si++) {
+      var scls = si < cur.idx ? 'done' : (si === cur.idx ? (graded ? 'answered' : 'current') : '');
+      segs += '<span class="seg' + (scls ? ' ' + scls : '') + '"></span>';
+    }
+    h += '<div class="segbar" role="progressbar" aria-valuenow="' + (cur.idx + (graded ? 1 : 0)) + '" aria-valuemin="0" aria-valuemax="' + total + '" aria-label="進捗">' + segs + '</div>';
     var m = metaOf(q, item);
     var chips = [];
     if (m.unit) chips.push(m.unit);
@@ -211,10 +218,13 @@
     h += '</div>';
     if (graded) {
       var cc = correctChoice(q, item);
-      h += '<div class="judge ' + (ans.correct ? 'ok' : 'ng') + '">' + (ans.correct ? '○ 正解' : '✕ 不正解') + '</div>';
+      h += '<div class="explain-sheet" id="explain-sheet"><div class="es-grip" aria-hidden="true"></div>' +
+        '<div class="judge ' + (ans.correct ? 'ok' : 'ng') + '"><span class="stamp ' + (ans.correct ? 'ok' : 'ng') +
+        '" data-mark="' + (ans.correct ? '○' : '✕') + '">' + (ans.correct ? '○' : '✕') + '</span>' +
+        (ans.correct ? '正解' : '不正解') + '</div>';
       h += '<p>正解は「' + esc(cc.text) + '」です。</p>';
       h += explainHtml(q, item, ans.choiceId);
-      h += '<div class="btn-row"><button class="btn" id="q-next">' + (cur.idx + 1 >= total ? '結果を見る' : '次の問題へ') + '</button></div>';
+      h += '<div class="es-foot"><button class="btn" id="q-next">' + (cur.idx + 1 >= total ? '結果を見る' : '次の問題へ') + '</button></div></div>';
     } else if (cur.mock) {
       h += '<div class="btn-row">' +
         (cur.idx > 0 ? '<button class="btn sub" id="q-prev">前の問題へ</button>' : '') +
@@ -377,7 +387,8 @@
     });
     h += '</div>';
     h += '<div class="judge ' + (ans && ans.correct ? 'ok' : 'ng') + '">' +
-      (ans ? (ans.correct ? '○ 正解でした' : '✕ 不正解でした') : '未回答でした') + '</div>';
+      (ans ? '<span class="stamp ' + (ans.correct ? 'ok' : 'ng') + '" data-mark="' + (ans.correct ? '○' : '✕') + '">' +
+        (ans.correct ? '○' : '✕') + '</span>' + (ans.correct ? '正解でした' : '不正解でした') : '未回答でした') + '</div>';
     h += '<p>正解は「' + esc(cc.text) + '」です。</p>';
     h += explainHtml(q, item, ans && ans.choiceId);
     h += '<div class="btn-row"><button class="btn" id="rv-back">結果に戻る</button></div>';
@@ -418,6 +429,12 @@
   window.JHQuiz = {
     start: start, resume: resume, bindExplainActions: bindExplainActions,
     getQ: getQ, explainHtml: explainHtml, imageHtml: imageHtml,
-    isActive: function () { return !!cur; }
+    isActive: function () { return !!cur; },
+    activeMode: function () { return cur ? (cur.mode || '') : ''; },
+    /* 関連問題ジャンプを中断して呼び出し元へ戻るための破棄（セッション保存も消す） */
+    abandon: function () {
+      cur = null;
+      try { window.JHStore.state.session = null; window.JHStore.save(); } catch (e) { /* ignore */ }
+    }
   };
 })();

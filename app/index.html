@@ -16,14 +16,24 @@
 <header id="app-header">
   <button id="btn-back" class="hbtn" aria-label="戻る" hidden>‹</button>
   <div id="header-title">日本史学習アプリ</div>
-  <button id="btn-search" class="hbtn" aria-label="検索">🔍</button>
-  <button id="btn-settings" class="hbtn" aria-label="設定">⚙</button>
+  <button id="btn-search" class="hbtn" aria-label="検索"><svg class="hicon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path class="s" d="M15.3 15.3L21 21"/></svg></button>
+  <button id="btn-settings" class="hbtn" aria-label="設定"><svg class="hicon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/></svg></button>
 </header>
 
 <main id="app-main">
-  <div id="loading" class="loading-box">
-    <p>読み込み中…</p>
-    <p class="muted small">初回はデータ（問題・テキスト・辞書）を読み込むため、少し時間がかかります。</p>
+  <div id="loading" class="loading-box splash">
+    <div class="splash-mark" aria-hidden="true">
+      <svg viewBox="0 0 512 512">
+        <rect width="512" height="512" rx="96" fill="#1f2a5a"/>
+        <rect x="36" y="36" width="440" height="440" rx="72" fill="none" stroke="#c8a24a" stroke-width="10"/>
+        <text x="166" y="163" text-anchor="middle" dominant-baseline="central" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif CJK JP',serif" font-weight="bold" font-size="148" fill="#f6f4ee">日</text>
+        <text x="346" y="163" text-anchor="middle" dominant-baseline="central" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif CJK JP',serif" font-weight="bold" font-size="148" fill="#f6f4ee">本</text>
+        <circle cx="166" cy="349" r="54" fill="#bc002d"/>
+        <text x="346" y="349" text-anchor="middle" dominant-baseline="central" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif CJK JP',serif" font-weight="bold" font-size="148" fill="#f6f4ee">史</text>
+      </svg>
+    </div>
+    <p class="splash-name">日本史学習アプリ</p>
+    <p class="muted small">読み込み中…<br>初回はデータ（問題・テキスト・辞書）を読み込むため、少し時間がかかります。</p>
   </div>
 </main>
 

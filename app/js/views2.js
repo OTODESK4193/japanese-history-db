@@ -13,7 +13,7 @@
   function rankUpToast() {
     var up = S.checkRankUp();
     if (up) {
-      A.toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+      A.rankUpToast(up); // トースト＋金粉・桜の祝福アニメーション
     }
   }
 
@@ -439,7 +439,7 @@
             else if (b === btn) b.classList.add('wrong');
           });
           document.getElementById('rc-after').innerHTML =
-            '<div class="judge ' + (ok ? 'ok' : 'ng') + '">' + (ok ? '○ 正解' : '✕ 不正解') + '</div>' +
+            '<div class="judge ' + (ok ? 'ok' : 'ng') + '"><span class="stamp ' + (ok ? 'ok' : 'ng') + '" data-mark="' + (ok ? '○' : '✕') + '">' + (ok ? '○' : '✕') + '</span>' + (ok ? '正解' : '不正解') + '</div>' +
             '<div class="chips"><button class="chip term" data-term="' + esc(t.term) + '">' + esc(t.term) + ' の用語シート</button></div>' +
             '<div class="btn-row"><button class="btn" id="rc-next">' + (i + 1 >= session.length ? '結果を見る' : '次へ') + '</button></div>';
           document.querySelectorAll('#rc-after [data-term]').forEach(function (el) {

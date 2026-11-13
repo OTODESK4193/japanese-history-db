@@ -8,6 +8,104 @@
 
   function unitOf(q) { return (q.unit || '').split(' ')[0]; }
 
+  /* ---------------- 統一線画アイコン（和風モチーフ・紺＋朱の2色） ----------------
+   * .s = 朱の線、.f = 朱の塗り。それ以外は currentColor（紺／カード地色に追従）。 */
+  var ICONS = {
+    exam: '<path d="M2.5 5.2c6.5 1.7 12.5 1.7 19 0"/><path class="s" d="M5 9.8h14"/><path d="M7.5 9.8V20M16.5 9.8V20M12 7.2v4.4"/>', /* 鳥居 */
+    mock: '<circle cx="6" cy="12" r="3.6"/><path d="M9.6 8.4h9.9M9.6 15.6h9.9M19.5 8.4c1.6 2.4 1.6 4.8 0 7.2"/><path class="s" d="M8.2 12a2.2 2.2 0 1 1-2.2-2.2"/>', /* 巻物 */
+    themes: '<path d="M17.8 3.2l2.9 2.9L11.2 15.6l-3.8.7.7-3.8z"/><path class="s" d="M8.1 12.5L5.3 17.7c-.5.9.4 1.8 1.3 1.3l5.2-2.8"/>', /* 筆 */
+    jhs: '<path d="M12 3.2L2.8 8.8h18.4z"/><path d="M5.5 8.8V19M10 8.8V19M14 8.8V19M18.5 8.8V19M3.5 20.8h17"/><circle class="f" cx="12" cy="6.4" r="1"/>', /* 校舎 */
+    cloze: '<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path class="s" d="M13.8 13.8h5.4v5.4h-5.4z" stroke-dasharray="2.4 2"/>', /* 欠けたマス */
+    dict: '<path d="M6.5 3H19v15.2H6.5A1.6 1.6 0 0 0 4.9 19.8V4.6A1.6 1.6 0 0 1 6.5 3z"/><path d="M4.9 18.2A1.6 1.6 0 0 1 6.5 16.6H19"/><path class="s" d="M9 7.4h6.2M9 11h4.2"/>', /* 書冊 */
+    cards: '<rect x="7" y="3" width="10" height="18" rx="2"/><circle cx="12" cy="6.8" r="1.5"/><path class="s" d="M9.8 12h4.4M9.8 15.6h4.4"/>', /* 札 */
+    years: '<rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M3.5 10.2h17M8 3v4M16 3v4"/><path class="s" d="M7.6 14.4h3M13.4 14.4h3M7.6 17.6h3"/>', /* 暦 */
+    recall: '<ellipse cx="12" cy="12.6" rx="6.4" ry="7.4"/><path d="M9.2 5.2h5.6M9.8 20h4.4M5.9 9.6c4 1.1 8.2 1.1 12.2 0M5.9 15.6c4-1.1 8.2-1.1 12.2 0"/><path class="s" d="M12 2.4v2.8"/>', /* 提灯 */
+    trivia: '<path d="M12 21v-7.5"/><path class="s" d="M12 13.5C12 9.9 9.4 7.4 5.8 7.4c0 3.6 2.6 6.1 6.2 6.1z"/><path class="s" d="M12 11.5c0-3.6 2.6-6.1 6.2-6.1 0 3.6-2.6 6.1-6.2 6.1z"/>', /* 若葉 */
+    review: '<rect x="5" y="5" width="14" height="14" rx="3.5"/><path class="s" d="M9 9.8h6M12 9.8v6.4M9.3 13.2h5.4"/>', /* 印章 */
+    stats: '<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M3.5 12h17"/><circle class="f" cx="8" cy="8.6" r="1.4"/><circle class="f" cx="13.2" cy="8.6" r="1.4"/><circle class="f" cx="10.6" cy="15.4" r="1.4"/><circle class="f" cx="16" cy="15.4" r="1.4"/>', /* 算盤 */
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path class="s" d="M15.3 15.3L21 21"/>' /* 虫眼鏡 */
+  };
+  function iconSvg(mode) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[mode] || ICONS.search) + '</svg>';
+  }
+
+  /* ---------------- 今週の学習（週間カレンダー） ---------------- */
+  function dayKey(ts) {
+    var d = new Date(ts);
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+  }
+  function weekActivity() {
+    var st = S.state;
+    var seen = {};
+    st.attempts.forEach(function (a) { if (a.ts) seen[dayKey(a.ts)] = true; });
+    st.yearAttempts.forEach(function (a) { if (a.ts) seen[dayKey(a.ts)] = true; });
+    var now = new Date();
+    var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+      days.push({
+        date: d.getDate(), dow: '月火水木金土日'[i], studied: !!seen[dayKey(d.getTime())],
+        today: d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+      });
+    }
+    // 連続学習日数: 今日（未学習なら昨日）から遡って数える
+    var streak = 0;
+    var cur = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (!seen[dayKey(cur.getTime())]) cur.setDate(cur.getDate() - 1);
+    while (seen[dayKey(cur.getTime())]) { streak++; cur.setDate(cur.getDate() - 1); }
+    return { days: days, streak: streak };
+  }
+  function weekCalHtml() {
+    var w = weekActivity();
+    var h = '<div class="week-cal"><div class="wc-head"><span>今週の学習</span>' +
+      '<span class="wc-streak">' + (w.streak > 0 ? w.streak + '日連続学習中' : '今日から始めよう') + '</span></div><div class="wc-days">';
+    w.days.forEach(function (d) {
+      h += '<div class="wc-day' + (d.studied ? ' studied' : '') + (d.today ? ' today' : '') + '">' +
+        '<span class="wc-dow">' + d.dow + '</span><span class="wc-date">' + d.date + '</span>' +
+        '<span class="wc-mark">●</span></div>';
+    });
+    return h + '</div></div>';
+  }
+
+  /* ---------------- 今日のおすすめ（行き先の自動決定） ----------------
+   * 優先順位: 進行中セッションの再開 ＞ 期限の来た復習 ＞ 正答率が最も低い単元（実績あり）の単元テスト ＞ 入試問題 */
+  function recommendTarget() {
+    var st = S.state;
+    if (st.session && st.session.items && st.session.items.length) {
+      return { kind: 'session',
+        sub: '前回の続き「' + st.session.title + '」を ' + (st.session.idx + 1) + '問目から再開できます' };
+    }
+    var due = S.dueCount();
+    if (due > 0) {
+      return { kind: 'review', sub: '復習の期限が来ている項目が ' + due + ' 件あります。忘れる前にいま復習しましょう' };
+    }
+    var worst = null;
+    D.texts.forEach(function (t) {
+      var att = st.attempts.filter(function (a) { return a.kind === 'hs' && a.unit === t.unit_id; });
+      if (!att.length) return;
+      var rate = att.filter(function (a) { return a.correct; }).length / att.length;
+      if (!worst || rate < worst.rate) worst = { unit: t.unit_id, title: t.title, rate: rate };
+    });
+    if (worst) {
+      return { kind: 'unit', unit: worst.unit,
+        sub: '正答率が最も低い「' + worst.title + '」（' + Math.round(worst.rate * 100) + '%）の単元テストで克服しましょう' };
+    }
+    return { kind: 'exam', sub: 'まずは入試問題で腕試ししてみましょう' };
+  }
+  function runRecommend() {
+    var r = recommendTarget();
+    if (r.kind === 'session') {
+      A.push(function () { window.JHQuiz.resume(S.state.session); }, S.state.session.title);
+    } else if (r.kind === 'review') {
+      A.push(window.JHViews2.renderReview, '復習リスト');
+    } else if (r.kind === 'unit') {
+      startUnitTest(r.unit);
+    } else {
+      A.push(window.JHViews2.renderExamSetup, '入試問題');
+    }
+  }
+
   /* ---------------- ホーム ---------------- */
   function renderHome() {
     A.setTitle('日本史学習アプリ');
@@ -48,7 +146,13 @@
         '<button class="btn" id="resume-btn">続きから再開する</button> ' +
         '<button class="btn sub" id="discard-btn">破棄する</button></div>';
     }
+    h += weekCalHtml();
     h += '</section>';
+    // 今日のおすすめ: ヒーロー直下の主ボタン（行き先は学習状況から自動決定）
+    var rec = recommendTarget();
+    h += '<button class="recommend-btn" id="home-recommend"><span class="rec-arrow">›</span>' +
+      '<span class="rec-label">つづきからはじめる</span>' +
+      '<span class="rec-sub">' + esc(rec.sub) + '</span></button>';
     // モード: グループ見出しで整理し、主役モードに階層を付ける
     h += '<h2 class="group-title">問題演習</h2><div class="grid2">' +
       modeCard('exam', '入試問題', D.hs.length + '問', '形式・分野・難易度で絞り込み可', 'mode-accent') +
@@ -89,8 +193,9 @@
 
   function modeCard(mode, label, stat, sub, variant) {
     return '<div class="card tap mode-card' + (variant ? ' ' + variant : '') + '" data-mode="' + mode + '">' +
-      '<div class="mc-label">' + esc(label) + '</div>' +
-      '<div class="mc-sub">' + esc(sub) + '</div>' +
+      '<div class="mc-head"><span class="mc-icon">' + iconSvg(mode) + '</span>' +
+      '<div class="mc-head-txt"><div class="mc-label">' + esc(label) + '</div>' +
+      '<div class="mc-sub">' + esc(sub) + '</div></div></div>' +
       (stat ? '<div class="mc-stat">' + esc(stat) + '</div>' : '') + '</div>';
   }
 
@@ -117,6 +222,8 @@
     if (due) due.addEventListener('click', function () { A.push(window.JHViews2.renderReview, '復習リスト'); });
     var rk = document.getElementById('home-rank');
     if (rk) rk.addEventListener('click', function () { A.push(renderTitles, '称号'); });
+    var rc = document.getElementById('home-recommend');
+    if (rc) rc.addEventListener('click', runRecommend);
   }
 
   /* ---------------- 称号一覧 ---------------- */
@@ -172,6 +279,31 @@
   /* ---------------- 単元テキスト ---------------- */
   var textState = {}; // unitId -> {tab:'body'|'timeline'|'years'|'desc', tlAxis:'日本'|'世界'|'両方', anchorYear}
 
+  /* ---------------- 読書プログレス（テキスト表示中のみ・上端の細バー） ---------------- */
+  var textFxScroll = null;
+  function installTextFx() {
+    cleanupTextFx();
+    var bar = document.createElement('div');
+    bar.id = 'read-progress';
+    bar.setAttribute('aria-hidden', 'true');
+    bar.innerHTML = '<span></span>';
+    document.body.appendChild(bar);
+    var fill = bar.firstChild;
+    textFxScroll = function () {
+      var de = document.documentElement;
+      var max = (de ? de.scrollHeight : 0) - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, (window.scrollY || 0) / max)) : 0;
+      fill.style.width = (p * 100).toFixed(1) + '%';
+    };
+    window.addEventListener('scroll', textFxScroll, { passive: true });
+    textFxScroll();
+  }
+  function cleanupTextFx() {
+    if (textFxScroll) { window.removeEventListener('scroll', textFxScroll); textFxScroll = null; }
+    var bar = document.getElementById('read-progress');
+    if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+  }
+
   function renderText(unitId, sectionId) {
     var t = D.textByUnit[unitId];
     if (!t) { A.toast('テキストが見つかりません'); return; }
@@ -200,6 +332,7 @@
       var target = document.getElementById('sec-' + sectionId);
       if (target) setTimeout(function () { target.scrollIntoView({ block: 'start' }); }, 60);
     }
+    installTextFx(); // 読書プログレス（画面を離れるときに JHApp 側で片付ける）
   }
 
   function materialHtml(m) {
@@ -486,6 +619,8 @@
     renderHome: renderHome, renderText: renderText, goMode: goMode,
     renderTitles: renderTitles,
     startUnitTest: startUnitTest, bindTextActions: bindTextActions,
-    goroBadge: goroBadge, unitOf: unitOf
+    goroBadge: goroBadge, unitOf: unitOf,
+    cleanupTextFx: cleanupTextFx, recommendTarget: recommendTarget,
+    weekActivity: weekActivity
   };
 })();

@@ -5,11 +5,27 @@
   var esc = window.JHData.esc;
   var S = window.JHStore;
 
-  var stack = []; // [{fn, title}]
+  var stack = []; // [{fn, title, y}] — y はその画面を離れた時点のスクロール位置
+  var homeY = 0;    // ホーム画面のスクロール位置
   var mainEl = null, titleEl = null, backBtn = null;
 
   function setTitle(t) { if (titleEl) titleEl.textContent = t; }
   function syncBackBtn() { if (backBtn) backBtn.hidden = stack.length === 0; }
+
+  /* 現在のスクロール位置（ブラウザ差異を吸収して最大値を取る） */
+  function currentY() {
+    var de = document.documentElement, b = document.body;
+    return Math.max(window.scrollY || 0, de ? de.scrollTop || 0 : 0, b ? b.scrollTop || 0 : 0);
+  }
+  /* 復元は描画直後と、画像などの遅延レイアウト後にもう一度当てる */
+  function applyScroll(y) {
+    window.scrollTo(0, y);
+    setTimeout(function () { window.scrollTo(0, y); }, 60);
+  }
+  /* ビュー切替前にテキスト画面の効果（読書プログレス等）を片付ける */
+  function cleanupFx() {
+    if (window.JHViews && window.JHViews.cleanupTextFx) window.JHViews.cleanupTextFx();
+  }
 
   function renderTop() {
     var top = stack[stack.length - 1];
@@ -20,24 +36,46 @@
   }
 
   function push(fn, title) {
-    stack.push({ fn: fn, title: title });
+    // 離れる画面の位置を、その画面のスタック項目（なければホーム）に保存する
+    if (stack.length) stack[stack.length - 1].y = currentY();
+    else homeY = currentY();
+    cleanupFx();
+    stack.push({ fn: fn, title: title, y: 0 });
     renderTop();
+    window.scrollTo(0, 0); // 新規に開いた画面は先頭から
   }
 
-  function goHome() {
+  function goHome() { goHomeAt(null); }
+  function goHomeAt(restoreY) {
+    cleanupFx();
     stack = [];
     setTitle('日本史学習アプリ');
     window.JHViews.renderHome();
     syncBackBtn();
-    window.scrollTo(0, 0);
+    if (restoreY != null) applyScroll(restoreY);
+    else window.scrollTo(0, 0);
   }
 
   function back() {
-    // クイズ進行中はホームへ（セッションは保存済みで再開できる）
-    if (window.JHQuiz && window.JHQuiz.isActive && window.JHQuiz.isActive()) { goHome(); return; }
+    if (window.JHQuiz && window.JHQuiz.isActive && window.JHQuiz.isActive()) {
+      // 関連問題（1問ジャンプ）の最中なら、もとの画面へ戻って位置も復元する
+      if (window.JHQuiz.activeMode && window.JHQuiz.activeMode() === 'jump') {
+        window.JHQuiz.abandon();
+      } else {
+        // 通常のクイズ進行中はホームへ（セッションは保存済みで再開できる）
+        goHome();
+        return;
+      }
+    }
     if (!stack.length) return;
     stack.pop();
-    renderTop();
+    cleanupFx();
+    if (!stack.length) { goHomeAt(homeY); return; }
+    var top = stack[stack.length - 1];
+    setTitle(top.title);
+    top.fn();
+    syncBackBtn();
+    applyScroll(top.y || 0); // 戻る経路でのみ元の位置に復元する
   }
 
   var toastTimer = null;
@@ -47,6 +85,33 @@
     el.hidden = false;
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { el.hidden = true; }, 2200);
+  }
+
+  /* ランクアップ時の祝福: 金粉と桜の花びらが舞う（数秒で消え、操作は妨げない） */
+  function celebrate() {
+    if (document.getElementById('celebrate-layer')) return;
+    var layer = document.createElement('div');
+    layer.id = 'celebrate-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    var h = '';
+    for (var i = 0; i < 14; i++) {
+      var dx = ((i * 47) % 160) - 80;
+      var rot = 180 + ((i * 61) % 260);
+      var delay = (i % 7) * 0.09;
+      var left = 18 + ((i * 29) % 64);
+      h += '<span class="petal ' + (i % 3 === 0 ? 'gold' : 'rose') + '" style="left:' + left + '%;--dx:' + dx +
+        'px;--rot:' + rot + 'deg;animation-delay:' + delay + 's"></span>';
+    }
+    layer.innerHTML = h;
+    document.body.appendChild(layer);
+    setTimeout(function () { layer.remove(); }, 3400);
+  }
+
+  /* ランクアップ共通表示（トースト＋祝福アニメーション） */
+  function rankUpToast(up) {
+    if (!up) return;
+    toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+    celebrate();
   }
 
   /* ---------------- 用語シート ---------------- */
@@ -112,7 +177,7 @@
     S.state.termStudy[t.id] = { known: known, ts: Date.now() };
     S.save();
     var up = S.checkRankUp();
-    if (up) toast('🎉 称号「' + up.title.name + '」にランクアップ！（学習ポイント ' + up.breakdown.total + '）');
+    if (up) rankUpToast(up);
     else toast(known ? '「覚えた」に記録しました' : '「まだ」に記録しました');
     openTerm(t.term);
   }
@@ -305,7 +370,8 @@
   window.JHApp = {
     setTitle: setTitle, push: push, back: back, goHome: goHome,
     openTerm: openTerm, openTextSection: openTextSection,
-    openViewer: openViewer, toast: toast
+    openViewer: openViewer, toast: toast,
+    rankUpToast: rankUpToast, celebrate: celebrate, getScrollY: currentY
   };
 
   function boot() {
