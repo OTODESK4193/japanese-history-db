@@ -352,7 +352,8 @@ a.placelink {
 
 /* 暗記シート: html.mask-on のとき色付き語句を用語と同じ幅の塗りつぶしブロックにする。
  * ブロック色はライト＝墨色／ダーク＝温かい灰で、地色に沈まず和風の配色に馴染む中間調にする。
- * タップで .revealed が付くと通常の文字色（本文色）で表示され、もう一度タップで隠れる。 */
+ * タップで .revealed が付くと通常表示のときのリンク色（用語＝朱・地名＝藍）で表示され、
+ * もう一度タップで隠れる。本文色ではなくリンク色にするのは、地の文と区別するため。 */
 :root { --mask-bg: #3a352b; }
 html[data-color-theme="dark"] { --mask-bg: #8f8875; }
 html.mask-on a.termlink, html.mask-on a.placelink {
@@ -360,8 +361,13 @@ html.mask-on a.termlink, html.mask-on a.placelink {
   text-decoration: none; border-radius: 3px;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
 }
-html.mask-on a.termlink.revealed, html.mask-on a.placelink.revealed {
-  color: var(--ink); background-color: transparent; box-shadow: none;
+html.mask-on a.termlink.revealed {
+  color: var(--accent); background-color: transparent; box-shadow: none;
+  text-decoration: underline dotted;
+}
+html.mask-on a.placelink.revealed {
+  color: var(--steel); background-color: transparent; box-shadow: none;
+  text-decoration: underline dotted;
 }
 /* 対象外の範囲（穴埋め解説 .no-mask／用語シート等のオーバーレイ内）は通常表示を保つ */
 html.mask-on .no-mask a.termlink, html.mask-on .overlay a.termlink {
