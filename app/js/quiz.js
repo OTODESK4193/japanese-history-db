@@ -210,12 +210,13 @@
     qChoices(q, item).forEach(function (c, i) {
       var cls = 'choice';
       if (ans && ans.choiceId === c.id) cls += ' picked';
+      var cmark = '';
       if (graded) {
-        if (c.is_correct) cls += ' correct';
-        else if (ans.choiceId === c.id) cls += ' wrong';
+        if (c.is_correct) { cls += ' correct'; cmark = '<span class="cmark ok" aria-label="正解">◯</span>'; }
+        else if (ans.choiceId === c.id) { cls += ' wrong'; cmark = '<span class="cmark ng" aria-label="あなたの回答">✕</span>'; }
       }
       h += '<button class="' + cls + '" data-choice="' + esc(c.id) + '"' + (graded ? ' disabled' : '') + '>' +
-        '<span class="mark">' + 'ABCD'[i] + '</span>' + esc(c.text) + '</button>';
+        '<span class="mark">' + 'ABCD'[i] + '</span>' + esc(c.text) + cmark + '</button>';
     });
     h += '</div>';
     if (graded) {
@@ -226,7 +227,13 @@
         (ans.correct ? '正解' : '不正解') + '</div>';
       h += '<p>正解は「' + esc(cc.text) + '」です。</p>';
       h += explainHtml(q, item, ans.choiceId);
-      h += '<div class="es-foot"><button class="btn" id="q-next">' + (cur.idx + 1 >= total ? '結果を見る' : '次の問題へ') + '</button></div></div>';
+      h += '<div class="es-foot"><div class="es-btns">' +
+        '<button class="btn sub" id="q-show-question">問題を見る</button>' +
+        '<button class="btn" id="q-next">' + (cur.idx + 1 >= total ? '結果を見る' : '次の問題へ') + '</button>' +
+        '</div></div></div>';
+      // 問題を見る: 解説シートを隠し、背後の問題文・選択肢（◯✕付き・読み取り専用）を表示する
+      h += '<div class="explain-return" id="explain-return" hidden>' +
+        '<button class="btn" id="q-back-explain">解説に戻る</button></div>';
     } else if (cur.mock) {
       h += '<div class="btn-row">' +
         (cur.idx > 0 ? '<button class="btn sub" id="q-prev">前の問題へ</button>' : '') +
@@ -249,6 +256,21 @@
     if (next) next.addEventListener('click', function () { cur.idx++; persist(); render(); });
     var prev = document.getElementById('q-prev');
     if (prev) prev.addEventListener('click', function () { cur.idx--; persist(); render(); });
+    var showQ = document.getElementById('q-show-question');
+    if (showQ) showQ.addEventListener('click', function () {
+      var sheet = document.getElementById('explain-sheet');
+      var ret = document.getElementById('explain-return');
+      if (sheet) sheet.style.display = 'none';
+      if (ret) ret.hidden = false;
+      window.scrollTo(0, 0); // 問題文の先頭から見せる
+    });
+    var backEx = document.getElementById('q-back-explain');
+    if (backEx) backEx.addEventListener('click', function () {
+      var sheet = document.getElementById('explain-sheet');
+      var ret = document.getElementById('explain-return');
+      if (sheet) sheet.style.display = '';
+      if (ret) ret.hidden = true;
+    });
     bindExplainActions(main);
   }
 
@@ -384,9 +406,10 @@
     h += '<div class="choices">';
     qChoices(q, item).forEach(function (c, i) {
       var cls = 'choice';
-      if (c.is_correct) cls += ' correct';
-      else if (ans && ans.choiceId === c.id) cls += ' wrong';
-      h += '<button class="' + cls + '" disabled><span class="mark">' + 'ABCD'[i] + '</span>' + esc(c.text) + '</button>';
+      var cmark = '';
+      if (c.is_correct) { cls += ' correct'; cmark = '<span class="cmark ok" aria-label="正解">◯</span>'; }
+      else if (ans && ans.choiceId === c.id) { cls += ' wrong'; cmark = '<span class="cmark ng" aria-label="あなたの回答">✕</span>'; }
+      h += '<button class="' + cls + '" disabled><span class="mark">' + 'ABCD'[i] + '</span>' + esc(c.text) + cmark + '</button>';
     });
     h += '</div>';
     h += '<div class="judge ' + (ans && ans.correct ? 'ok' : 'ng') + '">' +

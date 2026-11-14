@@ -598,6 +598,14 @@ html[data-color-theme="dark"] .wc-day.today { background: var(--surface-alt); }
 .choice.correct .mark { border-color: var(--ok); color: #fff; background: var(--ok); }
 .choice.wrong .mark { border-color: var(--ng); color: #fff; background: var(--ng); }
 
+/* 採点後の選択肢につく ◯✕ 印（問題の確認表示・振り返り共通） */
+.choice .cmark {
+  flex: none; margin-left: auto; padding-left: 10px; align-self: center;
+  font-weight: 800; font-size: 1.15em; line-height: 1;
+}
+.choice .cmark.ok { color: var(--ok); }
+.choice .cmark.ng { color: var(--ng); }
+
 /* 判子（ハンコ）の判定アニメーション */
 .judge { display: flex; align-items: center; gap: 10px; }
 .stamp {
@@ -635,6 +643,19 @@ html[data-color-theme="dark"] .wc-day.today { background: var(--surface-alt); }
   border-top: 1px dashed var(--line);
 }
 .explain-sheet .es-foot .btn { width: 100%; }
+.explain-sheet .es-foot .es-btns { display: flex; gap: 8px; }
+.explain-sheet .es-foot .es-btns .btn { width: auto; }
+.explain-sheet .es-foot .es-btns #q-next { flex: 1; }
+
+/* 「問題を見る」で解説シートを隠したときに下部へ出す「解説に戻る」バー */
+.explain-return {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+  max-width: 860px; margin: 0 auto;
+  background: var(--surface); border-top: 1px solid var(--line);
+  box-shadow: 0 -10px 28px -12px rgba(43, 32, 16, .3);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.explain-return .btn { width: 100%; }
 @keyframes sheetUp {
   from { transform: translateY(56px); opacity: .3; }
   to { transform: translateY(0); opacity: 1; }

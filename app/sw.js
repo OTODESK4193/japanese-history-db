@@ -1,6 +1,6 @@
 /* sw.js — network-first（オンライン時は常に最新、オフライン時はキャッシュ）。
  * コアシェルのみ precache し、個別に失敗しても install 全体は壊れない。 */
-var CACHE_VERSION = 'jh-static-v19';
+var CACHE_VERSION = 'jh-static-v20';
 var CORE = [
   './',
   './index.html',
