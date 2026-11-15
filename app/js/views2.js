@@ -240,6 +240,9 @@
       window.scrollTo(0, 0);
       var fl = document.getElementById('fc-flip');
       if (fl) fl.addEventListener('click', function () { flipped = true; draw(); });
+      // カード本体のタップでもめくる（カード内の文言「タップで意味を表示」に合わせる）
+      var cel = document.querySelector('#app-main .flashcard');
+      if (cel && !flipped) cel.addEventListener('click', function () { flipped = true; draw(); });
       var kn = document.getElementById('fc-known');
       if (kn) kn.addEventListener('click', function () { judge(true); });
       var un = document.getElementById('fc-unknown');
@@ -378,6 +381,9 @@
       window.scrollTo(0, 0);
       var fl = document.getElementById('yc-flip');
       if (fl) fl.addEventListener('click', function () { flipped = true; draw(); });
+      // カード本体のタップでもめくる（カード内の文言「タップで答えを表示」に合わせる）
+      var cel2 = document.querySelector('#app-main .flashcard');
+      if (cel2 && !flipped) cel2.addEventListener('click', function () { flipped = true; draw(); });
       var kn = document.getElementById('yc-known');
       if (kn) kn.addEventListener('click', function () { judge(true); });
       var un = document.getElementById('yc-unknown');
@@ -577,6 +583,9 @@
       document.getElementById('app-main').innerHTML = h;
       var fl = document.getElementById('yr-flip');
       if (fl) fl.addEventListener('click', function () { flipped = true; draw(); });
+      // カード本体のタップでもめくる（カード内の文言「タップで答えを表示」に合わせる）
+      var cel3 = document.querySelector('#app-main .flashcard');
+      if (cel3 && !flipped) cel3.addEventListener('click', function () { flipped = true; draw(); });
       var kn = document.getElementById('yr-known');
       if (kn) kn.addEventListener('click', function () { judge(true); });
       var un = document.getElementById('yr-unknown');
